@@ -2,17 +2,17 @@
 
 (define LINES (file->lines "2020-12-02.txt"))
 
-
-(eprintf "Part 1~n")
-
 ; Split string and convert to correct types
-(define (split s)
-  (define parts (string-split s #rx"[- :]+"))
+(define (split str)
+  (define parts (string-split str #rx"[- :]+"))
   (list
    (string->number (first parts))
    (string->number (second parts))
    (string-ref (third parts) 0)
    (fourth parts)))
+
+
+(eprintf "Part 1~n")
 
 ; Are the occurrences of the given letter, in the given range?
 (define (is-valid-1? min max char str)
