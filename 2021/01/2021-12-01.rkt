@@ -2,23 +2,19 @@
 
 (define NUMBERS (file->list "2021-12-01.txt"))
 
-(printf "Part 1~n")
+(define (count-sequential-increases lst)
+  (count
+   positive?
+   (map - (append (rest lst) (list 0)) lst)))
 
-(count
- positive?
- (map
-  -
-  (append (rest NUMBERS) (list 0))
-  NUMBERS))
+(printf "Part 1~n")
+(count-sequential-increases NUMBERS)
+
 
 (printf "Part 2~n")
-(define three-window
-  (map
+(count-sequential-increases
+ (map
    +
-   NUMBERS
-   (append (rest NUMBERS) (list 0))
-   (append (rest (rest NUMBERS)) (list 0 0))))
-
-(count
- positive?
- (map - (append (rest three-window) (list 0)) three-window))
+   (append (list-tail NUMBERS 0) (build-list 0 (lambda (x) 0)))
+   (append (list-tail NUMBERS 1) (build-list 1 (lambda (x) 0)))
+   (append (list-tail NUMBERS 2) (build-list 2 (lambda (x) 0)))))
