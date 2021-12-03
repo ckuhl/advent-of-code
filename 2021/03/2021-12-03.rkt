@@ -44,7 +44,52 @@
 
 (printf "Part 2~n")
 
-(define (filter-strings-by-index lst index v)
-  (filter (lambda (x) (string-ref v index)) lst))
+; trie for binary numbers of identical length
+; trie := (trie . trie) | (number . number) | empty
+; Left = 0, right = 1
+
+; Insert / update a binary number into a trie
+(define (trie-insert str trie)
+  (cond
+    [(string=? "" str) (if (empty? trie) 1 (add1 trie))]
+    [(empty? trie) (trie-insert str (cons empty empty))]
+    [(eq? #\0 (string-ref str 0)) (cons (trie-insert (substring str 1) (car trie)) (cdr trie))] ; string starts with 0
+    [else (cons (car trie) (trie-insert (substring str 1) (cdr trie)))])) ; string starts with 1
 
 
+(define int-trie (foldl trie-insert empty LINES))
+
+(define (trie-count trie)
+  (cond
+    [(pair? trie) (+ (trie-count (car trie)) (trie-count (cdr trie)))]
+    [(empty? trie) 0]
+    [else trie]))
+
+(define (trie-most-popular trie)
+  (cond
+    ; Base case
+    [(number? trie) empty]
+
+    ; Recursive cases
+    [(> (trie-count (car trie)) (trie-count (cdr trie)))
+     (cons #\0 (trie-most-popular (car trie)))]
+    [else (cons #\1 (trie-most-popular (cdr trie)))]))
+
+; Copypasta
+(define (trie-least-popular trie)
+  (cond
+    ; Base case(s)
+    [(number? trie) empty]
+
+    ; When there's one left, take that branch
+    [(= 1 (trie-count trie)) (if (= 1 (trie-count (car trie))) (cons #\0 (trie-least-popular (car trie))) (cons #\1 (trie-least-popular (cdr trie))))]
+
+    ; Standard recursive cases
+    [(> (trie-count (car trie)) (trie-count (cdr trie)))
+     (cons #\1 (trie-least-popular (cdr trie)))]
+    [else (cons #\0 (trie-least-popular (car trie)))]))
+
+
+(*
+ (string->number (list->string (trie-most-popular int-trie)) 2)
+ (string->number (list->string (trie-least-popular int-trie)) 2))
