@@ -1,2 +1,5 @@
 # Racket temporary files (usually created by DrRacket)
 *.rkt~
+
+# General macOS files
+.DS_Store
