@@ -8,7 +8,7 @@
 ; List of numbers called in sequence
 (define NUMBERS (map string->number (string-split (first LINES) ",")))
 
-; string? -> (list number?)
+; Convert a string representing some numbers into a list of numbers
 (define (line->numbers str) (map string->number (string-split str " " #:repeat? #t)))
 
 ; List of lists of ints: Boards are a list of integers forming a square array
@@ -24,18 +24,17 @@
    '()
    (rest (rest LINES))))
 
-; Rotate a matrix 90 degrees (make rows columns)
+; Rotate a list of lists 90 degrees (rows->columns
 (define (rotate-matrix board)
   (reverse (apply map list board)))
 
-; All winning lines in a single board: horizontal, vertical, and diagonal (x2)
-; (list (list number?)) -> (list (list number?))
+; All winning lines in a single board: horizontal and vertical
 (define (lines-in-board board)
   (append
    board
    (rotate-matrix board)))
 
-; Given a set of lines, remove a given number from all that match
+; Given a list of list of numbers, remove the given number
 (define (remove-number lines n)
   (map (lambda (x) (remove n x)) lines))
 
@@ -43,7 +42,8 @@
 (define (remove-numbers lines ns)
   (foldr (lambda (x acc) (remove-number acc x)) lines ns))
 
-; Print out a list of all numbers necessary to clear a single line in a board
+; Given a list of winning lines, and numbers called in order, return the subset of numbers
+;  that need to be called sequentially before one of the lines is cleared
 (define (solve-board lines nums)
   (cond [(member empty lines) empty]
         [else
@@ -51,15 +51,14 @@
                (solve-board (remove-number lines (first nums)) (rest nums)))]))
 
 
-; Given a list of lists, return the index and sequence of the shortest list
-; (list (list any)) -> (number? . list)
+; Given a list of lists, return the shortest list
 (define (shortest lsts)
   (foldr
    (lambda (a b) (if (< (length a) (length b)) a b))
-   NUMBERS
+   NUMBERS ; hardcoding but hey it works
    lsts))
 
-; Above, but return the longest list
+; Given a list of lists, return the longest list
 (define (longest lsts)
   (foldr
    (lambda (a b) (if (> (length a) (length b)) a b))
@@ -72,6 +71,8 @@
    (last numbers)
    (apply + (apply append (remove-numbers board numbers)))))
 
+
+; Calculate the winning sequence of numbers called for every board
 (define winning-sequences (map (lambda (x) (solve-board (lines-in-board x) NUMBERS)) BOARDS))
 
 
@@ -80,12 +81,10 @@
 
 (define shortest-winner (shortest winning-sequences))
 
-(define winning-board-index (index-of winning-sequences shortest-winner))
-
-(define winning-board (list-ref BOARDS winning-board-index))
-
 ; Correct answer: 8442
-(calculate-score shortest-winner winning-board)
+(calculate-score
+ shortest-winner
+ (list-ref BOARDS (index-of winning-sequences shortest-winner)))
 
 
 ; ==============================================================================
@@ -93,9 +92,7 @@
 
 (define longest-winner (longest winning-sequences))
 
-(define longest-board-index (index-of winning-sequences longest-winner))
-
-(define longest-board (list-ref BOARDS longest-board-index))
-
 ; Correct answer: 4590
-(calculate-score longest-winner longest-board)
+(calculate-score
+ longest-winner
+ (list-ref BOARDS (index-of winning-sequences longest-winner)))
