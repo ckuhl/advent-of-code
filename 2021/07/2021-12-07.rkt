@@ -1,3 +1,4 @@
+
 #lang racket
 
 (define LINES (file->string "2021-12-07.txt"))
@@ -51,14 +52,14 @@
   (define x_n (recurrence x_n-1 l_n-1 c_n-1 r_n-1))
 
   (if (= c_n-1_idx furthest-crab) empty
-  (cons
-   x_n 
-   (run-recurrence
-    x_n
-    l_n
-    r_n
-    (add1 c_n-1_idx)
-    h))))
+      (cons
+       x_n 
+       (run-recurrence
+        x_n
+        l_n
+        r_n
+        (add1 c_n-1_idx)
+        h))))
 
 
 ; ==============================================================================
@@ -74,5 +75,27 @@
 ;Solution is 331067
 (apply min fuel-by-index)
 
+
 ; ==============================================================================
 (printf "Part 2~n")
+
+(define (linear-fuel x) x)
+(define (arithmetic-fuel x) (/ (* x (+ x 1)) 2))
+
+(define (create-line size fn loc)
+  (for/list ([i (in-inclusive-range 0 size)])
+    (abs (fn (abs (- i loc))))))
+
+(define (minimize-fuel-usage positions fuel-function)
+  (apply
+   min
+   (map
+    (lambda (x) (apply + x))
+    (apply
+     map
+     list
+     (for/list
+         ([i positions])
+       (create-line furthest-crab fuel-function i))))))
+
+(minimize-fuel-usage NUMBERS arithmetic-fuel)
