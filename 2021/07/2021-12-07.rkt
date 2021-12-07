@@ -5,7 +5,7 @@
 
 (define NUMBERS (map string->number (string-split (string-trim LINES) ",")))
 
-(define TEST (map string->number (string-split (string-trim "16,1,2,0,4,2,7,1,2,14") ",")))
+(define TEST-NUMBERS (map string->number (string-split (string-trim "16,1,2,0,4,2,7,1,2,14") ",")))
 
 
 ; Given a list of items, insert each into the hash as a key, with the value
@@ -18,6 +18,9 @@
 
 (define crab-hash (list->counted-hash NUMBERS))
 (define furthest-crab (apply max NUMBERS))
+
+; ==============================================================================
+(printf "Part 1~n")
 
 ; It takes 1 fuel to move one crab one unit.
 ; If we know the number of crabs on both sides of a point, we know how much
@@ -61,9 +64,6 @@
         (add1 c_n-1_idx)
         h))))
 
-
-; ==============================================================================
-(printf "Part 1~n")
 (define x_0 (apply + (hash-map crab-hash (lambda (k v) (* k v)))))
 (define l_0 0)
 (define r_0 (apply + (hash-map crab-hash (lambda (k v) (if (zero? k) 0 v)))))
@@ -73,29 +73,50 @@
   (run-recurrence x_0 l_0 r_0 c_0_idx crab-hash))
 
 ;Solution is 331067
-(apply min fuel-by-index)
+(time
+ (apply min fuel-by-index))
 
 
 ; ==============================================================================
 (printf "Part 2~n")
 
+; Fuel calculation functions: How much fuel is required to move x units?
 (define (linear-fuel x) x)
 (define (arithmetic-fuel x) (/ (* x (+ x 1)) 2))
 
+; Create a line of fuel units required to move to each point in a line
 (define (create-line size fn loc)
   (for/list ([i (in-inclusive-range 0 size)])
     (abs (fn (abs (- i loc))))))
 
-(define (minimize-fuel-usage positions fuel-function)
-  (apply
-   min
-   (map
-    (lambda (x) (apply + x))
-    (apply
-     map
-     list
-     (for/list
-         ([i positions])
-       (create-line furthest-crab fuel-function i))))))
+; Helper: Apply create-line to a list of integers
+(define (create-lines size fn lst)
+  (for/list
+      ([i lst])
+    (create-line size fn i)))
 
-(minimize-fuel-usage NUMBERS arithmetic-fuel)
+; Helper: Rotate a list of lists 90 (i.e. make rows into columns)
+(define (rotate-list-lists lst)
+  (apply map list lst))
+
+; Helper: Sum a list of numbers
+(define (list-sum lst) (apply + lst))
+(define (list-min lst) (apply min lst))
+
+; Disgusting function to calculate the minimal amount of fuel required to align
+;  all of the crabs. Calculate each line, then rotate, sum, and select the
+;  minimal value.
+(define (minimize-fuel-usage positions fuel-function)
+  (list-min
+   (map
+    list-sum
+    (rotate-list-lists
+     (create-lines furthest-crab fuel-function NUMBERS)))))
+
+; Re-run part 1 solution using part 2 code
+(time
+ (minimize-fuel-usage NUMBERS linear-fuel))
+
+; Part 2 solution is 92881128
+(time
+ (minimize-fuel-usage NUMBERS arithmetic-fuel))
