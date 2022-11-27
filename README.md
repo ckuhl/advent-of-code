@@ -6,3 +6,5 @@ _I should be hooked up to AoC via this GitHub account now._
 
 - [2020](2020/README.md)
 - [2021](2021/README.md)
+- [2022](2022/README.md)
+
