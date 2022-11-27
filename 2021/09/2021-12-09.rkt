@@ -139,6 +139,8 @@
       (set)
       (find-basin heightmap pts (list->set (list pt)))))
 
+; FIXME: This doesn't handle the case of multiple low points within one basin
+; TO fix that, we will need to remove all points in each basin from the list of low points
 (define (get-all-basins heightmap)
   (map (lambda (x) (get-basin heightmap points x))
        (get-low-points heightmap)))
@@ -155,5 +157,7 @@
       (get-all-basins heightmap)
       (lambda (x y) (> (length (set->list x)) (length (set->list y)))))
      3))))
+
+(get-all-basins LINES)
 
 (multiply-top3-basin-sizes LINES)
