@@ -2,6 +2,7 @@
 
 (define INPUT (file->lines "2022-12-01.txt"))
 
+; Input is a list of strings, with sublists separated by 
 (define (take-first-sublist lst)
   (cond
     [(empty? lst) empty]
@@ -16,8 +17,7 @@
 
 (define (sublist-ify lst)
   (if
-   (empty? lst)
-   empty
+   (empty? lst) empty
   (cons
    (take-first-sublist lst)
    (sublist-ify (skip-first-sublist lst)))))
@@ -28,14 +28,10 @@
 
 (printf "Part 1~n")
 
+
 (apply max CALORIES)
 
 
 (printf "Part 2~n")
 
-(define top-calories (sort CALORIES >))
-
-(+
- (first top-calories)
- (second top-calories)
- (third top-calories))
+(apply + (take (sort CALORIES >) 3))
