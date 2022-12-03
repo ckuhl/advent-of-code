@@ -1,7 +1,11 @@
 #lang racket
 
+(require rackunit)
+
+(define TEST-INPUT (file->lines "2022-12-02-example.txt"))
 (define INPUT (file->lines "2022-12-02.txt"))
 
+; ==============================================================================
 (printf "Part 1~n")
 
 (define points
@@ -16,9 +20,11 @@
      ("C Y" . 2)
      ("C Z" . 6))))
 
-(apply + (map (lambda (x) (hash-ref points x)) INPUT))
+(define (solve-part-1 x) (apply + (map (lambda (x) (hash-ref points x)) x)))
+(test-equal? "Example input should be correct" (solve-part-1 TEST-INPUT) 15)
+(solve-part-1 INPUT)
 
-
+; ==============================================================================
 (printf "Part 2~n")
 
 (define new-points
@@ -33,4 +39,6 @@
      ("C Y" . 6)
      ("C Z" . 7))))
 
-(apply + (map (lambda (x) (hash-ref new-points x)) INPUT))
+(define (solve-part-2 x) (apply + (map (lambda (x) (hash-ref new-points x)) x)))
+(test-equal? "Example input should be correct" (solve-part-2 TEST-INPUT) 12)
+(solve-part-2 INPUT)
