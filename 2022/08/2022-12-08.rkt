@@ -75,41 +75,43 @@
 (define (generate-views 2d pt)
   (define row (get-row 2d pt))
   (define col (get-col 2d pt))
-  (printf "~v~n" pt)
-  (printf "~v~v~n" row col)
+  ;(printf "Point: ~v~n" pt)
+  (printf "Row, col: ~v, ~v~n" row col)
 
-  (define up (drop col (add1 (car pt))))
-  (define left (reverse (take row (cdr pt))))
-  (define down (reverse (take col (car pt))))
-  (define right (drop row (add1 (cdr pt))))
+  (define up (take col (sub1 (cdr pt))))
+  (define left (take row (car pt)))
+  (define down (drop col (cdr pt)))
+  (define right (drop row (add1 (car pt))))
   
   (list up left down right))
 
 (define (get-point 2d pt)
   (list-ref (list-ref 2d (cdr pt)) (car pt)))
 
-(define (count-seen lst init [must-beat -1] [acc 0])
+; 
+(define (count-seen lst init [looking-down #f] [must-beat -1])
+  (printf "~v :: ~v :: ~v~n" lst init must-beat)
   (cond
-    [(empty? lst) acc]
-    [(and (> init (first lst))
-          (< must-beat init))
-     (count-seen (rest lst) init (first lst) (add1 acc))]
+    [(empty? lst) 0]
+    [(and looking-down (> init (first lst)))
+     (add1 (count-seen (rest lst) init #t))]
+    [looking-down
+     (add1 (count-seen (rest lst) init #f (first lst)))]
     [(< must-beat (first lst))
-     (count-seen (rest lst) init (first lst) (add1 acc))]
-    [else
-     (count-seen (rest lst) init must-beat acc)]))
+     (add1 (count-seen (rest lst) init #f (first lst)))]
+    [else (count-seen (rest lst) init #f must-beat)]))
 
 (define (calculate-view 2d pt)
   (define views (generate-views 2d pt))
-  (define point (get-point 2d pt))
-  (printf "~v~V~n" point views)
+  (define height (get-point 2d pt))
+  (printf "Point height: ~v Views: ~V~n" height views)
 
-  (define (view-counter lst) (count-seen lst point))
-  (apply + (map view-counter views)))
+  (define (view-counter lst) (count-seen lst height))
+  (printf "~v~n" (map view-counter views))
+  (apply * (map view-counter views)))
 
-(calculate-view arr '(4 . 4))
-(calculate-view arr '(0 . 0))
-(calculate-view arr '(0 . 0))
+(calculate-view arr '(2 . 3))
+(calculate-view arr '(2 . 1))
 
 ; TODO: This is a tomorrow problem
 (define (solve-part-2 lst)
