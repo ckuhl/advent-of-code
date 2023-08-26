@@ -6,7 +6,12 @@ def load():
     return [x.strip().split(",") for x in default]
 
 
-def get_displacement(segment: str) -> tuple[int, int]:
+def test():
+    l = ["R8,U5,L5,D3", "U7,R6,D4,L4"]
+    return [x.strip().split(",") for x in l]
+
+
+def direction(segment: str) -> tuple[int, int]:
     return {
         "R": (+1, 0),
         "L": (-1, 0),
@@ -15,54 +20,58 @@ def get_displacement(segment: str) -> tuple[int, int]:
     }[segment[0]]
 
 
-def line_segment(pos: tuple[int, int], segment: str) -> set[tuple[int, int]]:
+def line_segment(pos: tuple[int, int], segment: str, dist: int) -> dict[tuple[int, int], int]:
     distance = int(segment[1:])
-    return {(pos[0] + get_displacement(segment)[0] * x, pos[1] + get_displacement(segment)[1] * x) for x in
-            range(distance)}
+    return {(pos[0] + direction(segment)[0] * x,
+             pos[1] + direction(segment)[1] * x): dist + x for x in range(distance)}
 
 
 def new_point(point: tuple[int, int], segment) -> tuple[int, int]:
     return (
-        point[0] + get_displacement(segment)[0] * int(segment[1:]),
-        point[1] + get_displacement(segment)[1] * int(segment[1:]),
+        point[0] + direction(segment)[0] * int(segment[1:]),
+        point[1] + direction(segment)[1] * int(segment[1:]),
     )
 
 
-def points_visited(line: list[str]) -> set[tuple[int, int]]:
-    # FIXME: We need to: update position on each move
-    #  Generate all segments from _both_ lines
-    #  Find all intersecting points
-    #  Find the minimal one
-    x, y = 0, 0
-    visited = set()
+def points_visited(line: list[str]) -> dict[tuple[int, int], int]:
+    x, y, dist = 0, 0, 0
+    visited = {}
     for point in line:
-        visited.update(line_segment((x, y), point))
+        # We update visited "backwards" so that we take the _earliest / lowest_ key value
+        tmp = line_segment((x, y), point, dist)
+        tmp.update(visited)
+        visited = tmp
         x, y = new_point((x, y), point)
+        dist += int(point[1:])
     return visited
 
 
-def find_overlap() -> set[tuple[int, int]]:
-    lines = [points_visited(x) for x in load()]
+def find_overlap(data: list[list[str]]) -> dict[tuple[int, int], int]:
+    lines = [points_visited(x) for x in data]
     first, second = lines
-    return first.intersection(second)
+    return {k: first[k] + second[k] for k in first.keys() & second.keys()}
 
 
-def find_smallest_abs_point(points: set[tuple[int, int]]) -> tuple[int, int]:
-    points.remove((0, 0))
+def find_smallest_abs_point(points: dict[tuple[int, int], int]) -> int:
+    del points[(0, 0)]
     return list(sorted(list(points), key=lambda x: abs(x[0]) + abs(x[1])))[0]
 
 
 def part1():
-    x, y = find_smallest_abs_point(find_overlap())
+    x, y = find_smallest_abs_point(find_overlap(load()))
     return abs(x) + abs(y)
 
 
+def find_earliest_distance(points: dict[tuple[int, int], int]) -> tuple[int, int]:
+    del points[(0, 0)]
+    earliest = sorted(points, key=lambda k: points[k])[0]
+    return points[earliest]
+
+
 def part2():
-    # TODO: Now we care about distance as well. Likely we want to use a dict and count steps of each wire.
-    #       Taking an intersection then means summing the values of both points.
-    #       Then we just need to sort the keys and choose the lowest.
-    raise NotImplementedError
+    return find_earliest_distance(find_overlap(load()))
 
 
 if __name__ == "__main__":
     print(part1())
+    print(part2())
