@@ -52,7 +52,7 @@ def find_overlap(data: list[list[str]]) -> dict[tuple[int, int], int]:
     return {k: first[k] + second[k] for k in first.keys() & second.keys()}
 
 
-def find_smallest_abs_point(points: dict[tuple[int, int], int]) -> int:
+def find_smallest_abs_point(points: dict[tuple[int, int], int]) -> tuple[int, int]:
     del points[(0, 0)]
     return list(sorted(list(points), key=lambda x: abs(x[0]) + abs(x[1])))[0]
 
@@ -62,7 +62,7 @@ def part1():
     return abs(x) + abs(y)
 
 
-def find_earliest_distance(points: dict[tuple[int, int], int]) -> tuple[int, int]:
+def find_earliest_distance(points: dict[tuple[int, int], int]) -> int:
     del points[(0, 0)]
     earliest = sorted(points, key=lambda k: points[k])[0]
     return points[earliest]
