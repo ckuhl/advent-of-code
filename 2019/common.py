@@ -8,10 +8,14 @@ logging.basicConfig(level=logging.DEBUG)
 @dataclasses.dataclass
 class State:
     memory: list[int]
-    pc: int = 0
+    ip: int = 0
     # The input queue allows for queuing up inputs to the computer
     #  Useful for running non-interactively
-    input_queue: list[int] = lambda: []
+    input_queue: list[int] = dataclasses.field(default_factory=list)
+
+    # The output queue allows for inspecting outputs programmatically
+    #  Useful for writing tests
+    output_queue: list[int] = dataclasses.field(default_factory=list)
 
     def read(self, offset: int) -> int:
         try:
@@ -22,6 +26,8 @@ class State:
 
     def write(self, offset: int, value: int) -> None:
         """nb. d5: Parameters that are written to will never be in immediate mode"""
+        if offset < 0:
+            raise IndexError(f"Offset must be positive, got index={offset} while writing value={value}")
         try:
             self.memory[offset] = value
         except IndexError:
@@ -35,86 +41,153 @@ class State:
         else:
             return int(input("> "))
 
-    @staticmethod
-    def write_output(v: int) -> None:
+    def write_output(self, v: int) -> None:
         """Helper: Provide output somewhere"""
-        print(v)
+        self.output_queue.append(v)
+
+    def opcode(self):
+        return self.memory[self.ip] % 100
+
+    def a(self, is_dest=False):
+        mode = self.memory[self.ip] // 10000
+        value = self.memory[self.ip + 3]
+        if mode == 0 and not is_dest:
+            value = self.read(value)
+        return value
+
+    def b(self, is_dest=False):
+        mode = self.memory[self.ip] % 10000 // 1000
+        value = self.memory[self.ip + 2]
+        if mode == 0 and not is_dest:
+            value = self.read(value)
+        return value
+
+    def c(self, is_dest=False):
+        mode = self.memory[self.ip] % 1000 // 100
+        value = self.memory[self.ip + 1]
+        if mode == 0 and not is_dest:
+            value = self.read(value)
+        return value
 
 
 def op_1(state: State):
     """
-    op a, b, c
-    load a
+    add c, b, a
+    load c
     load b
-    sum a, b
-    store c
+    add b, c
+    store a
     """
-    decoded = decode(state.read(state.pc))
-    pos1 = state.read(state.pc + 1)
-    if decoded.C == 0:
-        pos1 = state.read(pos1)
-    pos2 = state.read(state.pc + 2)
-    if decoded.B == 0:
-        pos2 = state.read(pos2)
-    pos3 = state.read(state.pc + 3)
-
     state.write(
-        pos3,
-        pos1 + pos2,
+        state.a(is_dest=True),
+        state.c() + state.b(),
     )
-    state.pc += 4
+    state.ip += 4
     return computer(state)
 
 
 def op_2(state: State) -> State:
     """
-    op a, b, c:
-    load value at index  a
-    load value at index b
-    multiply v_a, v_b
-    store in c
+    mult c, b, a:
+    load b
+    load c
+    multiply b, c
+    store a
     """
-    decoded = decode(state.read(state.pc))
-    pos1 = state.read(state.pc + 1)
-    if decoded.C == 0:
-        pos1 = state.read(pos1)
-    pos2 = state.read(state.pc + 2)
-    if decoded.B == 0:
-        pos2 = state.read(pos2)
-    pos3 = state.read(state.pc + 3)
-
-    state.write(pos3, pos1 * pos2)
-    state.pc += 4
+    state.write(
+        state.a(is_dest=True),
+        state.c() * state.b(),
+    )
+    state.ip += 4
     return computer(state)
 
 
 def op_3(state: State) -> State:
     """
-    op a
+    read c
     Read input
-    Store in a
+    Store in c
     """
     state.write(
-        state.read(state.pc + 1),
+        state.c(is_dest=True),
         state.read_input(),
     )
 
-    state.pc += 2
+    state.ip += 2
     return computer(state)
 
 
 def op_4(state: State) -> State:
     """
-    op a
-    Load a
+    write c
+    Load c
     Write to output
     """
-    pos1 = state.read(
-        state.read(state.pc + 1)
-    )
-    state.write_output(pos1)
+    state.write_output(state.c())
 
-    state.pc += 2
+    state.ip += 2
+    return computer(state)
+
+
+def op_5(state: State) -> State:
+    """
+    Jump-if-true
+    jit c, b
+    if c != 0:
+        ip = b
+    """
+    if state.c() != 0:
+        state.ip = state.b()
+    else:
+        state.ip += 3
+    return computer(state)
+
+
+def op_6(state: State) -> State:
+    """
+    Jump-if-false
+    jif c, b
+    if c == 0:
+        ip = b
+    """
+    if state.c() == 0:
+        state.ip = state.b()
+    else:
+        state.ip += 3
+    return computer(state)
+
+
+def op_7(state: State) -> State:
+    """
+    Less than
+    lt c, b, a
+    if c < b:
+        a = 1
+    else:
+        a = 0
+    """
+    if state.c() < state.b():
+        state.write(state.a(is_dest=True), 1)
+    else:
+        state.write(state.a(is_dest=True), 0)
+    state.ip += 4
+    return computer(state)
+
+
+def op_8(state: State) -> State:
+    """
+    Equals
+    eq c, b, a
+    if c == b:
+        a = 1
+    else:
+        a = 0
+    """
+    if state.c() == state.b():
+        state.write(state.a(is_dest=True), 1)
+    else:
+        state.write(state.a(is_dest=True), 0)
+    state.ip += 4
     return computer(state)
 
 
@@ -127,38 +200,12 @@ def op_99(state: State) -> State:
     return state
 
 
-@dataclasses.dataclass
-class Instruction:
-    operation: int
-    A: int
-    B: int
-    C: int
-
-
-def decode(op: int) -> Instruction:
-    """
-    ABCDE
-    _1002
-    DE - Instruction
-    C - First argument mode
-    B - Second argument mode
-    A - Third argument mode (leading zeroes are omitted, so we pad)
-    """
-    return Instruction(
-        operation=op % 100,
-        A=op // 10000,
-        B=op % 10000 // 1000,
-        C=op % 1000 // 100,
-    )
-
-
 def computer(state: State) -> State:
     """
-    Mutually recurse depending on the current value at the program counter (PC).
+    Mutually recurse depending on the current value at the instruction pointer (IP).
     """
-    opcode = state.read(state.pc)
-    log.debug("Step: %s, PC: %s", opcode, state.pc)
-    match opcode % 100:
+    log.debug("IP: %s, Opcode: %s", state.ip, state.opcode())
+    match state.opcode():
         case 1:
             return op_1(state)
         case 2:
@@ -167,7 +214,30 @@ def computer(state: State) -> State:
             return op_3(state)
         case 4:
             return op_4(state)
+        case 5:
+            return op_5(state)
+        case 6:
+            return op_6(state)
+        case 7:
+            return op_7(state)
+        case 8:
+            return op_8(state)
         case 99:
             return op_99(state)
         case int(x):
-            raise NotImplementedError(f"Unexpected opcode: {x}")
+            raise NotImplementedError(f"Unexpected opcode: {x}, instruction {state.memory[state.ip]}")
+
+
+if __name__ == "__main__":
+    import unittest
+
+
+    class TestJump(unittest.TestCase):
+        def test_jump1(self):
+            self.assertEqual(
+                computer(State([3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], input_queue=[0])).output_queue,
+                [0],
+            )
+
+
+    unittest.main()

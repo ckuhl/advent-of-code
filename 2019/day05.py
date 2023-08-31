@@ -8,10 +8,16 @@ def load() -> list[int]:
     return [int(y) for x in default for y in x.split(",")]
 
 
-def part1() -> None:
+def part1() -> State:
     state = State(load(), input_queue=[1])
-    computer(state)
+    return computer(state)
+
+
+def part2() -> State:
+    state = State(load(), input_queue=[5])
+    return computer(state)
 
 
 if __name__ == "__main__":
-    part1()  # 5346030 (should we assert on this?)
+    assert part1().output_queue == [0, 0, 0, 0, 0, 0, 0, 0, 0, 5346030]
+    assert part2().output_queue == [513116]
