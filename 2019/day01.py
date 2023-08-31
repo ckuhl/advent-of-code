@@ -32,5 +32,5 @@ def part2():
 
 
 if __name__ == "__main__":
-    print(part1())
-    print(part2())
+    assert part1() == 3416712
+    assert part2() ==5122170

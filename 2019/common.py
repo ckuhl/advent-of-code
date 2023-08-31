@@ -49,6 +49,7 @@ class State:
         return self.memory[self.ip] % 100
 
     def a(self, is_dest=False):
+        """Get the third (A) input value by mode"""
         mode = self.memory[self.ip] // 10000
         value = self.memory[self.ip + 3]
         if mode == 0 and not is_dest:
@@ -56,6 +57,7 @@ class State:
         return value
 
     def b(self, is_dest=False):
+        """Get the second (B) input value by mode"""
         mode = self.memory[self.ip] % 10000 // 1000
         value = self.memory[self.ip + 2]
         if mode == 0 and not is_dest:
@@ -63,6 +65,7 @@ class State:
         return value
 
     def c(self, is_dest=False):
+        """Get the first (C) input value by mode"""
         mode = self.memory[self.ip] % 1000 // 100
         value = self.memory[self.ip + 1]
         if mode == 0 and not is_dest:
@@ -233,7 +236,12 @@ if __name__ == "__main__":
 
 
     class TestJump(unittest.TestCase):
-        def test_jump1(self):
+        """
+        TODO: Determine (1) if tests should go in a different file, (2) if previous days should also, and go back and
+            add all the test cases so I don't ruin my life with regressions.
+        """
+
+        def test_jump(self):
             self.assertEqual(
                 computer(State([3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], input_queue=[0])).output_queue,
                 [0],
