@@ -1,4 +1,4 @@
-from common import State, computer
+from common import IntcodeComputer, computer
 
 
 def load():
@@ -7,7 +7,7 @@ def load():
 
 
 def part1(noun: int = 12, verb: int = 2) -> int:
-    state = State(load())
+    state = IntcodeComputer(load())
     state.write(1, noun)
     state.write(2, verb)
     state = computer(state)

@@ -1,14 +1,22 @@
 import dataclasses
+import enum
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
+
+class State(enum.Enum):
+    RUNNING = enum.auto()
+    STOPPED = enum.auto()
+    NEEDS_INPUT = enum.auto()
 
 
 @dataclasses.dataclass
-class State:
+class IntcodeComputer:
     memory: list[int]
     ip: int = 0
+
     # The input queue allows for queuing up inputs to the computer
     #  Useful for running non-interactively
     input_queue: list[int] = dataclasses.field(default_factory=list)
@@ -16,6 +24,8 @@ class State:
     # The output queue allows for inspecting outputs programmatically
     #  Useful for writing tests
     output_queue: list[int] = dataclasses.field(default_factory=list)
+
+    state: State = State.RUNNING
 
     def read(self, offset: int) -> int:
         try:
@@ -36,10 +46,7 @@ class State:
 
     def read_input(self) -> int:
         """Helper: Provide input"""
-        if self.input_queue:
-            return self.input_queue.pop(0)
-        else:
-            return int(input("> "))
+        return self.input_queue.pop(0)
 
     def write_output(self, v: int) -> None:
         """Helper: Provide output somewhere"""
@@ -73,7 +80,7 @@ class State:
         return value
 
 
-def op_1(state: State):
+def op_1(state: IntcodeComputer):
     """
     add c, b, a
     load c
@@ -89,7 +96,7 @@ def op_1(state: State):
     return computer(state)
 
 
-def op_2(state: State) -> State:
+def op_2(state: IntcodeComputer) -> IntcodeComputer:
     """
     mult c, b, a:
     load b
@@ -105,12 +112,21 @@ def op_2(state: State) -> State:
     return computer(state)
 
 
-def op_3(state: State) -> State:
+def op_3(state: IntcodeComputer) -> IntcodeComputer:
     """
     read c
     Read input
     Store in c
+
+    If we need input and there is none, we will return and wait for more input to be provided
     """
+    if not state.input_queue:
+        state.state = State.NEEDS_INPUT
+        return state
+
+    elif state.state == State.NEEDS_INPUT:
+        state.state = State.RUNNING
+
     state.write(
         state.c(is_dest=True),
         state.read_input(),
@@ -120,7 +136,7 @@ def op_3(state: State) -> State:
     return computer(state)
 
 
-def op_4(state: State) -> State:
+def op_4(state: IntcodeComputer) -> IntcodeComputer:
     """
     write c
     Load c
@@ -132,7 +148,7 @@ def op_4(state: State) -> State:
     return computer(state)
 
 
-def op_5(state: State) -> State:
+def op_5(state: IntcodeComputer) -> IntcodeComputer:
     """
     Jump-if-true
     jit c, b
@@ -146,7 +162,7 @@ def op_5(state: State) -> State:
     return computer(state)
 
 
-def op_6(state: State) -> State:
+def op_6(state: IntcodeComputer) -> IntcodeComputer:
     """
     Jump-if-false
     jif c, b
@@ -160,7 +176,7 @@ def op_6(state: State) -> State:
     return computer(state)
 
 
-def op_7(state: State) -> State:
+def op_7(state: IntcodeComputer) -> IntcodeComputer:
     """
     Less than
     lt c, b, a
@@ -177,7 +193,7 @@ def op_7(state: State) -> State:
     return computer(state)
 
 
-def op_8(state: State) -> State:
+def op_8(state: IntcodeComputer) -> IntcodeComputer:
     """
     Equals
     eq c, b, a
@@ -194,18 +210,21 @@ def op_8(state: State) -> State:
     return computer(state)
 
 
-def op_99(state: State) -> State:
+def op_99(state: IntcodeComputer) -> IntcodeComputer:
     """
     Exit computation; since we mutually recurse to run the computer, this means _not_ recurring.
 
     This is the only non-error exit from the mutual recursion.
     """
+    state.state = State.STOPPED
     return state
 
 
-def computer(state: State) -> State:
+def computer(state: IntcodeComputer) -> IntcodeComputer:
     """
     Mutually recurse depending on the current value at the instruction pointer (IP).
+
+    While this could be inside the above dataclass, keeping it separate helps avoid getting _too_ imperative.
     """
     log.debug("IP: %s, Opcode: %s", state.ip, state.opcode())
     match state.opcode():
@@ -229,23 +248,3 @@ def computer(state: State) -> State:
             return op_99(state)
         case int(x):
             raise NotImplementedError(f"Unexpected opcode: {x}, instruction {state.memory[state.ip]}")
-
-
-if __name__ == "__main__":
-    import unittest
-
-
-    class TestJump(unittest.TestCase):
-        """
-        TODO: Determine (1) if tests should go in a different file, (2) if previous days should also, and go back and
-            add all the test cases so I don't ruin my life with regressions.
-        """
-
-        def test_jump(self):
-            self.assertEqual(
-                computer(State([3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], input_queue=[0])).output_queue,
-                [0],
-            )
-
-
-    unittest.main()
