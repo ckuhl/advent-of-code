@@ -3,7 +3,7 @@ import enum
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class State(enum.Enum):
@@ -15,7 +15,12 @@ class State(enum.Enum):
 @dataclasses.dataclass
 class IntcodeComputer:
     memory: list[int]
+
+    # Internal pointer, should point to current/next instruction
     ip: int = 0
+
+    # Internal tracker for relative addressing
+    relative_base: int = 0
 
     # The input queue allows for queuing up inputs to the computer
     #  Useful for running non-interactively
@@ -27,22 +32,26 @@ class IntcodeComputer:
 
     state: State = State.RUNNING
 
-    def read(self, offset: int) -> int:
+    def read(self, address: int) -> int:
         try:
-            return self.memory[offset]
+            return self.memory[address]
         except IndexError:
-            log.error(f"Tried to read from memory index={offset}")
-            raise
+            if address > 0:
+                log.info("Tried to read addr=%s, extending memory by %s", address, address + 1 - len(self.memory))
+                self.memory = self.memory + [0] * (address + 1 - len(self.memory))
+                return self.memory[address]
+            else:
+                raise IndexError(f"Tried to read from negative address={address}")
 
-    def write(self, offset: int, value: int) -> None:
-        """nb. d5: Parameters that are written to will never be in immediate mode"""
-        if offset < 0:
-            raise IndexError(f"Offset must be positive, got index={offset} while writing value={value}")
+    def write(self, address: int, value: int) -> None:
         try:
-            self.memory[offset] = value
+            self.memory[address] = value
         except IndexError:
-            log.error(f"Tried to write value={value} to memory index={offset}")
-            raise
+            if address > 0:
+                self.memory = self.memory + [0] * (address + 1 - len(self.memory))
+                return self.write(address, value)
+            else:
+                raise IndexError(f"Tried to write value={value} to negative address={address}")
 
     def read_input(self) -> int:
         """Helper: Provide input"""
@@ -55,29 +64,58 @@ class IntcodeComputer:
     def opcode(self):
         return self.memory[self.ip] % 100
 
+    # FIXME: Given the repetition in the below, we should generalize
+
     def a(self, is_dest=False):
         """Get the third (A) input value by mode"""
         mode = self.memory[self.ip] // 10000
         value = self.memory[self.ip + 3]
-        if mode == 0 and not is_dest:
-            value = self.read(value)
-        return value
+        if mode == 2 and is_dest:
+            return value + self.relative_base
+        elif is_dest:
+            return value
+        elif mode == 0:
+            return self.read(value)
+        elif mode == 1:
+            return value
+        elif mode == 2:
+            return self.read(value + self.relative_base)
+        else:
+            raise NotImplementedError
 
     def b(self, is_dest=False):
         """Get the second (B) input value by mode"""
         mode = self.memory[self.ip] % 10000 // 1000
         value = self.memory[self.ip + 2]
-        if mode == 0 and not is_dest:
-            value = self.read(value)
-        return value
+        if mode == 2 and is_dest:
+            return value + self.relative_base
+        elif is_dest:
+            return value
+        elif mode == 0:
+            return self.read(value)
+        elif mode == 1:
+            return value
+        elif mode == 2:
+            return self.read(value + self.relative_base)
+        else:
+            raise NotImplementedError
 
     def c(self, is_dest=False):
         """Get the first (C) input value by mode"""
         mode = self.memory[self.ip] % 1000 // 100
         value = self.memory[self.ip + 1]
-        if mode == 0 and not is_dest:
-            value = self.read(value)
-        return value
+        if mode == 2 and is_dest:
+            return value + self.relative_base
+        elif is_dest:
+            return value
+        elif mode == 0:
+            return self.read(value)
+        elif mode == 1:
+            return value
+        elif mode == 2:
+            return self.read(value + self.relative_base)
+        else:
+            raise NotImplementedError
 
 
 def op_1(state: IntcodeComputer):
@@ -210,6 +248,17 @@ def op_8(state: IntcodeComputer) -> IntcodeComputer:
     return computer(state)
 
 
+def op_9(state: IntcodeComputer) -> IntcodeComputer:
+    """
+    Adjust relative base
+    arb c
+    rb += c
+    """
+    state.relative_base += state.c()
+    state.ip += 2
+    return computer(state)
+
+
 def op_99(state: IntcodeComputer) -> IntcodeComputer:
     """
     Exit computation; since we mutually recurse to run the computer, this means _not_ recurring.
@@ -226,7 +275,7 @@ def computer(state: IntcodeComputer) -> IntcodeComputer:
 
     While this could be inside the above dataclass, keeping it separate helps avoid getting _too_ imperative.
     """
-    log.debug("IP: %s, Opcode: %s", state.ip, state.opcode())
+    log.debug("IP: %s, RB: %s, Opcode: %s", state.ip, state.relative_base, state.opcode())
     match state.opcode():
         case 1:
             return op_1(state)
@@ -244,6 +293,8 @@ def computer(state: IntcodeComputer) -> IntcodeComputer:
             return op_7(state)
         case 8:
             return op_8(state)
+        case 9:
+            return op_9(state)
         case 99:
             return op_99(state)
         case int(x):

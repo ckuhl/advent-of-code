@@ -1,7 +1,5 @@
 import itertools
-import queue
 from pathlib import Path
-from queue import Queue
 
 from common import IntcodeComputer, computer, State
 
