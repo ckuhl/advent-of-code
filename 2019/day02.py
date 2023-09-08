@@ -1,5 +1,4 @@
-from common import IntcodeComputer, computer
-
+from common import IntcodeComputer
 
 def load():
     default = open("day02.txt").readlines()
@@ -10,7 +9,7 @@ def part1(noun: int = 12, verb: int = 2) -> int:
     state = IntcodeComputer(load())
     state.write(1, noun)
     state.write(2, verb)
-    state = computer(state)
+    state.computer()
     return state.read(0)
 
 

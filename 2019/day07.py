@@ -1,7 +1,7 @@
 import itertools
 from pathlib import Path
 
-from common import IntcodeComputer, computer, State
+from common import IntcodeComputer, State
 
 
 def load() -> list[int]:
@@ -16,7 +16,7 @@ part2_example1 = [
 
 def amplifier(program: list[int], phase: int, input_signal: int) -> int:
     state = IntcodeComputer(program, input_queue=[phase, input_signal])
-    state = computer(state)
+    state.computer()
     return state.output_queue.pop()
 
 
@@ -54,7 +54,7 @@ def part2():
         while not any([x.state == State.STOPPED for x in computers]):
             for n, c in enumerate(computers):
                 c.input_queue.append(current_signal)
-                run = computer(c)
+                run = c.computer()
                 computers[n] = run
                 current_signal = run.output_queue.pop()
 

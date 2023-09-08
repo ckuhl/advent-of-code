@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from common import computer, IntcodeComputer, State
+from common import IntcodeComputer, State
 
 
 def load() -> list[int]:
@@ -25,7 +25,7 @@ class PaintBot:
         3. Returns the produced output (direction change, paint colour)
         """
         self.cpu.input_queue.append(panel)
-        self.cpu = computer(self.cpu)
+        self.cpu = self.cpu.computer()
         return self.cpu.output_queue.pop(), self.cpu.output_queue.pop()
 
     def turn(self, turn: int):

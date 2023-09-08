@@ -68,249 +68,215 @@ class IntcodeComputer:
             else:
                 raise IndexError(f"Tried to write value={value} to negative address={address}")
 
-    def read_input(self) -> int:
-        """Helper: Provide input"""
-        return self.input_queue.pop(0)
-
-    def write_output(self, v: int) -> None:
-        """Helper: Provide output somewhere"""
-        self.output_queue.append(v)
-
     def opcode(self):
-        return self.memory[self.ip] % 100
+        """Opcodes can be two digits, and so we mod by 100."""
+        return self.read(self.ip) % 100
 
-    # FIXME: Given the repetition in the below, we should generalize
+    def _register(self, index: int, is_dest):
+        mode = self.memory[self.ip] % (10 ** (index + 2)) // (10 ** (index + 1))
+        value = self.memory[self.ip + index]
+
+        if mode == 2 and is_dest:
+            return value + self.relative_base
+        elif is_dest:
+            return value
+        elif mode == 0:
+            return self.read(value)
+        elif mode == 1:
+            return value
+        elif mode == 2:
+            return self.read(value + self.relative_base)
+        else:
+            raise NotImplementedError
 
     def a(self, is_dest=False):
-        """Get the third (A) input value by mode"""
-        mode = self.memory[self.ip] // 10000
-        value = self.memory[self.ip + 3]
-        if mode == 2 and is_dest:
-            return value + self.relative_base
-        elif is_dest:
-            return value
-        elif mode == 0:
-            return self.read(value)
-        elif mode == 1:
-            return value
-        elif mode == 2:
-            return self.read(value + self.relative_base)
-        else:
-            raise NotImplementedError
+        return self._register(3, is_dest)
 
     def b(self, is_dest=False):
-        """Get the second (B) input value by mode"""
-        mode = self.memory[self.ip] % 10000 // 1000
-        value = self.memory[self.ip + 2]
-        if mode == 2 and is_dest:
-            return value + self.relative_base
-        elif is_dest:
-            return value
-        elif mode == 0:
-            return self.read(value)
-        elif mode == 1:
-            return value
-        elif mode == 2:
-            return self.read(value + self.relative_base)
-        else:
-            raise NotImplementedError
+        return self._register(2, is_dest)
 
     def c(self, is_dest=False):
-        """Get the first (C) input value by mode"""
-        mode = self.memory[self.ip] % 1000 // 100
-        value = self.memory[self.ip + 1]
-        if mode == 2 and is_dest:
-            return value + self.relative_base
-        elif is_dest:
-            return value
-        elif mode == 0:
-            return self.read(value)
-        elif mode == 1:
-            return value
-        elif mode == 2:
-            return self.read(value + self.relative_base)
+        return self._register(1, is_dest)
+
+    def op_1(self):
+        """
+        Add c and b, and store in a.
+        ---
+        add c, b, a
+        load c
+        load b
+        add b, c
+        store a
+        """
+        self.write(
+            self.a(is_dest=True),
+            self.c() + self.b(),
+        )
+        self.ip += 4
+        return self.computer()
+
+    def op_2(self):
+        """
+        Multiply c and b, and store in a.
+        ---
+        mult c, b, a:
+        load b
+        load c
+        multiply b, c
+        store a
+        """
+        self.write(
+            self.a(is_dest=True),
+            self.c() * self.b(),
+        )
+        self.ip += 4
+        return self.computer()
+
+    def op_3(self):
+        """
+        Read input
+        ---
+        Read c from stdin
+        Store in c
+        ---
+        If we need input and there is none, we will return and wait for more input to be provided
+        """
+        if not self.input_queue:
+            self.state = State.NEEDS_INPUT
+            return self
+
+        elif self.state == State.NEEDS_INPUT:
+            self.state = State.RUNNING
+
+        self.write(
+            self.c(is_dest=True),
+            self.input_queue.pop(0),
+        )
+
+        self.ip += 2
+        return self.computer()
+
+    def op_4(self):
+        """
+        Write c
+        ---
+        Load c
+        Write to stdout
+        """
+        self.output_queue.append(self.c())
+
+        self.ip += 2
+        return self.computer()
+
+    def op_5(self):
+        """
+        Jump-if-true
+        ---
+        jit c, b
+        if c != 0:
+            ip = b
+        """
+        if self.c() != 0:
+            self.ip = self.b()
         else:
-            raise NotImplementedError
+            self.ip += 3
+        return self.computer()
 
+    def op_6(self):
+        """
+        Jump-if-false
+        ---
+        jif c, b
+        if c == 0:
+            ip = b
+        """
+        if self.c() == 0:
+            self.ip = self.b()
+        else:
+            self.ip += 3
+        return self.computer()
 
-def op_1(state: IntcodeComputer):
-    """
-    add c, b, a
-    load c
-    load b
-    add b, c
-    store a
-    """
-    state.write(
-        state.a(is_dest=True),
-        state.c() + state.b(),
-    )
-    state.ip += 4
-    return computer(state)
+    def op_7(self):
+        """
+        Less than
+        ---
+        lt c, b, a
+        if c < b:
+            a = 1
+        else:
+            a = 0
+        """
+        if self.c() < self.b():
+            self.write(self.a(is_dest=True), 1)
+        else:
+            self.write(self.a(is_dest=True), 0)
+        self.ip += 4
+        return self.computer()
 
+    def op_8(self):
+        """
+        Equals
+        ---
+        eq c, b, a
+        if c == b:
+            a = 1
+        else:
+            a = 0
+        """
+        if self.c() == self.b():
+            self.write(self.a(is_dest=True), 1)
+        else:
+            self.write(self.a(is_dest=True), 0)
+        self.ip += 4
+        return self.computer()
 
-def op_2(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    mult c, b, a:
-    load b
-    load c
-    multiply b, c
-    store a
-    """
-    state.write(
-        state.a(is_dest=True),
-        state.c() * state.b(),
-    )
-    state.ip += 4
-    return computer(state)
+    def op_9(self):
+        """
+        Adjust relative base
+        ---
+        arb c
+        rb += c
+        """
+        self.relative_base += self.c()
+        self.ip += 2
+        return self.computer()
 
+    def op_99(self):
+        """
+        Exit computation; since we mutually recurse to run the computer, this means _not_ recurring.
 
-def op_3(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    read c
-    Read input
-    Store in c
+        This is the only non-error exit from the mutual recursion.
+        """
+        self.state = State.STOPPED
+        return self
 
-    If we need input and there is none, we will return and wait for more input to be provided
-    """
-    if not state.input_queue:
-        state.state = State.NEEDS_INPUT
-        return state
+    def computer(self):
+        """
+        Mutually recurse depending on the current value at the instruction pointer (IP).
 
-    elif state.state == State.NEEDS_INPUT:
-        state.state = State.RUNNING
-
-    state.write(
-        state.c(is_dest=True),
-        state.read_input(),
-    )
-
-    state.ip += 2
-    return computer(state)
-
-
-def op_4(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    write c
-    Load c
-    Write to output
-    """
-    state.write_output(state.c())
-
-    state.ip += 2
-    return computer(state)
-
-
-def op_5(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Jump-if-true
-    jit c, b
-    if c != 0:
-        ip = b
-    """
-    if state.c() != 0:
-        state.ip = state.b()
-    else:
-        state.ip += 3
-    return computer(state)
-
-
-def op_6(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Jump-if-false
-    jif c, b
-    if c == 0:
-        ip = b
-    """
-    if state.c() == 0:
-        state.ip = state.b()
-    else:
-        state.ip += 3
-    return computer(state)
-
-
-def op_7(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Less than
-    lt c, b, a
-    if c < b:
-        a = 1
-    else:
-        a = 0
-    """
-    if state.c() < state.b():
-        state.write(state.a(is_dest=True), 1)
-    else:
-        state.write(state.a(is_dest=True), 0)
-    state.ip += 4
-    return computer(state)
-
-
-def op_8(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Equals
-    eq c, b, a
-    if c == b:
-        a = 1
-    else:
-        a = 0
-    """
-    if state.c() == state.b():
-        state.write(state.a(is_dest=True), 1)
-    else:
-        state.write(state.a(is_dest=True), 0)
-    state.ip += 4
-    return computer(state)
-
-
-def op_9(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Adjust relative base
-    arb c
-    rb += c
-    """
-    state.relative_base += state.c()
-    state.ip += 2
-    return computer(state)
-
-
-def op_99(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Exit computation; since we mutually recurse to run the computer, this means _not_ recurring.
-
-    This is the only non-error exit from the mutual recursion.
-    """
-    state.state = State.STOPPED
-    return state
-
-
-def computer(state: IntcodeComputer) -> IntcodeComputer:
-    """
-    Mutually recurse depending on the current value at the instruction pointer (IP).
-
-    While this could be inside the above dataclass, keeping it separate helps avoid getting _too_ imperative.
-    """
-    log.debug("IP: %s, RB: %s, Opcode: %s", state.ip, state.relative_base, state.opcode())
-    match state.opcode():
-        case 1:
-            return op_1(state)
-        case 2:
-            return op_2(state)
-        case 3:
-            return op_3(state)
-        case 4:
-            return op_4(state)
-        case 5:
-            return op_5(state)
-        case 6:
-            return op_6(state)
-        case 7:
-            return op_7(state)
-        case 8:
-            return op_8(state)
-        case 9:
-            return op_9(state)
-        case 99:
-            return op_99(state)
-        case int(x):
-            raise NotImplementedError(f"Unexpected opcode: {x}, instruction {state.memory[state.ip]}")
+        While this could be inside the above dataclass, keeping it separate helps avoid getting _too_ imperative.
+        """
+        log.debug("IP: %s, RB: %s, Opcode: %s", self.ip, self.relative_base, self.opcode())
+        match self.opcode():
+            case 1:
+                return self.op_1()
+            case 2:
+                return self.op_2()
+            case 3:
+                return self.op_3()
+            case 4:
+                return self.op_4()
+            case 5:
+                return self.op_5()
+            case 6:
+                return self.op_6()
+            case 7:
+                return self.op_7()
+            case 8:
+                return self.op_8()
+            case 9:
+                return self.op_9()
+            case 99:
+                return self.op_99()
+            case int(x):
+                raise NotImplementedError(f"Unexpected opcode: {x}, instruction {self.memory[self.ip]}")

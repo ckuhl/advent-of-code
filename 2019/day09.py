@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from common import computer, IntcodeComputer
+from common import IntcodeComputer
 
 
 def load() -> list[int]:
@@ -10,7 +10,7 @@ def load() -> list[int]:
 
 def part1():
     prog = IntcodeComputer(load(), input_queue=[1])
-    return computer(prog).output_queue
+    return prog.computer().output_queue
 
 
 def part2():
@@ -22,7 +22,7 @@ def part2():
     import sys
     limit = sys.getrecursionlimit()
     sys.setrecursionlimit(1_000_000)
-    result = computer(prog).output_queue
+    result = prog.computer().output_queue
     sys.setrecursionlimit(limit)
     return result
 

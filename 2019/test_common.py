@@ -4,7 +4,7 @@ import day02
 import day05
 import day07
 import day09
-from common import computer, IntcodeComputer
+from common import IntcodeComputer
 
 
 class TestDay2(unittest.TestCase):
@@ -13,35 +13,35 @@ class TestDay2(unittest.TestCase):
     def test_example0(self):
         prog = [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).memory,
+            IntcodeComputer(prog).computer().memory,
             [3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50]
         )
 
     def test_example1(self):
         prog = [1, 0, 0, 0, 99]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).memory,
+            IntcodeComputer(prog).computer().memory,
             [2, 0, 0, 0, 99]
         )
 
     def test_example2(self):
         prog = [2, 3, 0, 3, 99]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).memory,
+            IntcodeComputer(prog).computer().memory,
             [2, 3, 0, 6, 99]
         )
 
     def test_example3(self):
         prog = [2, 4, 4, 5, 99, 0]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).memory,
+            IntcodeComputer(prog).computer().memory,
             [2, 4, 4, 5, 99, 9801]
         )
 
     def test_example4(self):
         prog = [1, 1, 1, 4, 99, 5, 6, 0, 99]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).memory,
+            IntcodeComputer(prog).computer().memory,
             [30, 1, 1, 4, 2, 5, 6, 0, 99]
         )
 
@@ -59,7 +59,7 @@ class TestDay5(unittest.TestCase):
         """Example from Part 1"""
         prog = [1002, 4, 3, 4, 33]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).memory,
+            IntcodeComputer(prog).computer().memory,
             [1002, 4, 3, 4, 99]
         )
 
@@ -70,7 +70,7 @@ class TestDay5(unittest.TestCase):
         """
         prog = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
         self.assertEqual(
-            computer(IntcodeComputer(prog, input_queue=[8])).output_queue,
+            IntcodeComputer(prog, input_queue=[8]).computer().output_queue,
             [1],
         )
 
@@ -78,7 +78,7 @@ class TestDay5(unittest.TestCase):
         """Using position mode, consider whether the input is less than 8"""
         prog = [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8]
         self.assertEqual(
-            computer(IntcodeComputer(prog, input_queue=[8])).output_queue,
+            IntcodeComputer(prog, input_queue=[8]).computer().output_queue,
             [0],
         )
 
@@ -86,7 +86,7 @@ class TestDay5(unittest.TestCase):
         """Using immediate mode, consider whether the input is equal to 8"""
         prog = [3, 3, 1108, -1, 8, 3, 4, 3, 99]
         self.assertEqual(
-            computer(IntcodeComputer(prog, input_queue=[8])).output_queue,
+            IntcodeComputer(prog, input_queue=[8]).computer().output_queue,
             [1],
         )
 
@@ -96,7 +96,7 @@ class TestDay5(unittest.TestCase):
         """
         prog = [3, 3, 1107, -1, 8, 3, 4, 3, 99]
         self.assertEqual(
-            computer(IntcodeComputer(prog, input_queue=[8])).output_queue,
+            IntcodeComputer(prog, input_queue=[8]).computer().output_queue,
             [0],
         )
 
@@ -109,7 +109,7 @@ class TestDay5(unittest.TestCase):
         """
         prog = [3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
         self.assertEqual(
-            computer(IntcodeComputer(prog, input_queue=[8])).output_queue,
+            IntcodeComputer(prog, input_queue=[8]).computer().output_queue,
             [1],
         )
 
@@ -120,7 +120,7 @@ class TestDay5(unittest.TestCase):
         """
         prog = [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]
         self.assertEqual(
-            computer(IntcodeComputer(prog, input_queue=[8])).output_queue,
+            IntcodeComputer(prog, input_queue=[8]).computer().output_queue,
             [1],
         )
 
@@ -137,7 +137,7 @@ class TestDay5(unittest.TestCase):
         ]
         for test_in, test_out in ((6, 999), (7, 999), (8, 1000), (9, 1001), (10, 1001)):
             self.assertEqual(
-                computer(IntcodeComputer(prog, input_queue=[test_in])).output_queue,
+                IntcodeComputer(prog, input_queue=[test_in]).computer().output_queue,
                 [test_out],
             )
 
@@ -176,7 +176,7 @@ class TestDay9(unittest.TestCase):
         prog = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
 
         self.assertEqual(
-            computer(IntcodeComputer(prog)).output_queue,
+            IntcodeComputer(prog).computer().output_queue,
             prog,
         )
 
@@ -188,7 +188,7 @@ class TestDay9(unittest.TestCase):
         """
         prog = [1102, 34915192, 34915192, 7, 4, 7, 99, 0]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).output_queue,
+            IntcodeComputer(prog).computer().output_queue,
             [1219070632396864],
         )
 
@@ -199,7 +199,7 @@ class TestDay9(unittest.TestCase):
         This is also testing the ability to output large numbers."""
         prog = [104, 1125899906842624, 99]
         self.assertEqual(
-            computer(IntcodeComputer(prog)).output_queue,
+            IntcodeComputer(prog).computer().output_queue,
             [1125899906842624],
         )
 

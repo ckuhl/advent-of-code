@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from common import IntcodeComputer, computer
+from common import IntcodeComputer
 
 
 def load() -> list[int]:
@@ -10,12 +10,12 @@ def load() -> list[int]:
 
 def part1() -> IntcodeComputer:
     state = IntcodeComputer(load(), input_queue=[1])
-    return computer(state)
+    return state.computer()
 
 
 def part2() -> IntcodeComputer:
     state = IntcodeComputer(load(), input_queue=[5])
-    return computer(state)
+    return state.computer()
 
 
 if __name__ == "__main__":
