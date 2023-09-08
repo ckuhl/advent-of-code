@@ -32,23 +32,38 @@ class IntcodeComputer:
 
     state: State = State.RUNNING
 
+    def __extend_to(self, address: int) -> None:
+        """Helper: Extend memory when accessed beyond last member"""
+        desired_increase = address + 1 - len(self.memory)
+        log.info("Extending memory from %d by %d to %d", len(self.memory), desired_increase, address)
+        self.memory = self.memory + [0] * desired_increase
+
     def read(self, address: int) -> int:
+        """
+        Read value from memory, extending if necessary.
+        Throw an exception if a negative value is requested.
+        We use try-except because it is faster in the happy path.
+        """
         try:
             return self.memory[address]
         except IndexError:
             if address > 0:
-                log.info("Tried to read addr=%s, extending memory by %s", address, address + 1 - len(self.memory))
-                self.memory = self.memory + [0] * (address + 1 - len(self.memory))
+                self.__extend_to(address)
                 return self.memory[address]
             else:
                 raise IndexError(f"Tried to read from negative address={address}")
 
     def write(self, address: int, value: int) -> None:
+        """
+        Write a value to memory, extending if necessary.
+        Throw an exception if a negative value is requested.
+        We use try-except because it is faster in the happy path.
+        """
         try:
             self.memory[address] = value
         except IndexError:
             if address > 0:
-                self.memory = self.memory + [0] * (address + 1 - len(self.memory))
+                self.__extend_to(address)
                 return self.write(address, value)
             else:
                 raise IndexError(f"Tried to write value={value} to negative address={address}")
