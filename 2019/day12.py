@@ -84,15 +84,41 @@ def part1(system: str = problem, steps: int = 1000) -> int:
     return total_energy(velocity, distance)
 
 
+def find_period(distances: list[int], axis: int) -> int:
+    """
+    Doing a little bit of cheating; the code for part 1 works, we just want to... ignore the other axes.
+
+    So we'll strip them out, then run the above simulation until we loop back
+    """
+    distances = [0 if n % 3 != axis else x for n, x in enumerate(distances)]
+    velocity = [0 for _ in distances]
+
+    seen = set()
+    state = tuple(distances) + tuple(velocity)
+
+    while state not in seen:
+        seen.add(state)
+        velocity, distances = time_step(velocity, distances)
+        state = tuple(distances) + tuple(velocity)
+
+    return len(seen)
+
+
 def part2(system: str = problem) -> int:
     """
     As the problem hints; this could run for a long period of time!
     Likely we'll need to optimize:
     - In part 1, we realized that each axis is independent of the others
     - We know that each axis will eventually "loop around" (i.e. end up in its starting place)
-    - So if we store each separately, we can
+    - Likely then, each axis has a different period
+    - So instead of running all three in parallel, we can "cheat":
+        - For each axis separately: Find the period of that axis
+        - Then we need to find when they line up: Naively we can multiply them all together
+        - But that won't necessarily be the _first_ (consider periods of 2, 3, 6)
+        - So we need the Lowest Common Multiple
     """
-    raise NotImplementedError
+    periods = [find_period(distances=parse_system(system), axis=x) for x in range(0, 3)]
+    return math.lcm(*periods)
 
 
 if __name__ == "__main__":
@@ -100,6 +126,6 @@ if __name__ == "__main__":
     assert part1(example2, steps=100) == 1940
     assert part1() == 14907
 
-    # assert part2(example1) == 2772
-    # assert part2(example2) == 4_686_774_924
-    # print(part2())
+    assert part2(example1) == 2772
+    assert part2(example2) == 4_686_774_924
+    assert part2() == 467_081_194_429_464
