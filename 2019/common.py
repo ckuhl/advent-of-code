@@ -1,9 +1,5 @@
-import dataclasses
 import enum
 import logging
-
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 
 class State(enum.Enum):
@@ -12,30 +8,45 @@ class State(enum.Enum):
     NEEDS_INPUT = enum.auto()
 
 
-@dataclasses.dataclass
 class IntcodeComputer:
-    memory: list[int]
+    def __init__(
+            self,
+            program: list[int],
+            input_queue: list[int] | None = None,
+            log_level: int = logging.WARNING,
+    ):
 
-    # Internal pointer, should point to current/next instruction
-    ip: int = 0
+        self.memory: list[int] = program
 
-    # Internal tracker for relative addressing
-    relative_base: int = 0
+        # Internal pointer, should point to current/next instruction
+        self.ip: int = 0
 
-    # The input queue allows for queuing up inputs to the computer
-    #  Useful for running non-interactively
-    input_queue: list[int] = dataclasses.field(default_factory=list)
+        # Internal tracker for relative addressing
+        self.relative_base: int = 0
 
-    # The output queue allows for inspecting outputs programmatically
-    #  Useful for writing tests
-    output_queue: list[int] = dataclasses.field(default_factory=list)
+        # The input queue allows for queuing up inputs to the computer
+        #  Useful for running non-interactively
+        if input_queue is None:
+            self.input_queue: list[int] = []
+        else:
+            self.input_queue: list[int] = input_queue
 
-    state: State = State.RUNNING
+        # The output queue allows for inspecting outputs programmatically
+        #  Useful for writing tests
+        self.output_queue: list[int] = []
+
+        # Internal state of the computer, this is used for signalling different reasons it is stopped
+        # i.e. waiting on input, program exited cleanly, etc.
+        self.state: State = State.RUNNING
+
+        # Internal set-up: Things that we want to manage here
+        self._log = logging.getLogger(__name__)
+        logging.basicConfig(level=log_level)
 
     def __extend_to(self, address: int) -> None:
         """Helper: Extend memory when accessed beyond last member"""
         desired_increase = address + 1 - len(self.memory)
-        log.info("Extending memory from %d by %d to %d", len(self.memory), desired_increase, address)
+        self._log.info("Extending memory from %d by %d to %d", len(self.memory), desired_increase, address + 1)
         self.memory = self.memory + [0] * desired_increase
 
     def read(self, address: int) -> int:
@@ -256,7 +267,7 @@ class IntcodeComputer:
 
         While this could be inside the above dataclass, keeping it separate helps avoid getting _too_ imperative.
         """
-        log.debug("IP: %s, RB: %s, Opcode: %s", self.ip, self.relative_base, self.opcode())
+        self._log.debug("IP: %s, RB: %s, Opcode: %s", self.ip, self.relative_base, self.opcode())
         match self.opcode():
             case 1:
                 return self.op_1()
