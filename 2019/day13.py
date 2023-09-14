@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 
 from common import IntcodeComputer
 
@@ -8,7 +7,7 @@ sys.setrecursionlimit(1_000_000)
 
 
 def load() -> list[int]:
-    default = open(f"{Path(__file__).stem}.txt").readlines()
+    default = open(f"./input/day13.txt").readlines()
     return [int(y) for x in default for y in x.split(",")]
 
 

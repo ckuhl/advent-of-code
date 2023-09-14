@@ -1,7 +1,8 @@
 from common import IntcodeComputer
 
+
 def load():
-    default = open("day02.txt").readlines()
+    default = open("./input/day02.txt").readlines()
     return [int(y) for x in default for y in x.split(",")]
 
 

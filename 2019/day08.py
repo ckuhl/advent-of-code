@@ -1,9 +1,8 @@
 from collections import Counter
-from pathlib import Path
 
 
 def load() -> list[int]:
-    default = open(f"{Path(__file__).stem}.txt").readline().strip()
+    default = open(f"./input/day08.txt").readline().strip()
     return [int(x) for x in default]
 
 

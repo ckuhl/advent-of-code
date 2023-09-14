@@ -1,9 +1,8 @@
 from collections import defaultdict
-from pathlib import Path
 
 
 def load() -> list[str]:
-    return open(f"{Path(__file__).stem}.txt").readlines()
+    return open(f"./input/day06.txt").readlines()
 
 
 test_input = ['COM)B', 'B)C', 'C)D', 'D)E', 'E)F', 'B)G', 'G)H', 'D)I', 'E)J', 'J)K', 'K)L']

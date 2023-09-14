@@ -1,8 +1,5 @@
-from pathlib import Path
-
-
 def load():
-    default = open(f"{Path(__file__).stem}.txt").readlines()
+    default = open(f"./input/day03.txt").readlines()
     return [x.strip().split(",") for x in default]
 
 

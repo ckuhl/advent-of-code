@@ -1,5 +1,5 @@
 def load():
-    default = open("day01.txt").readlines()
+    default = open("./input/day01.txt").readlines()
     return [int(x) for x in default]
 
 
@@ -33,4 +33,4 @@ def part2():
 
 if __name__ == "__main__":
     assert part1() == 3416712
-    assert part2() ==5122170
+    assert part2() == 5122170

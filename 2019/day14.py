@@ -1,9 +1,8 @@
 import math
-from pathlib import Path
 
 
 def load() -> list[str]:
-    return open(f"{Path(__file__).stem}.txt").readlines()
+    return open(f"./input/day14.txt").readlines()
 
 
 problem = load()

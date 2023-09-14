@@ -1,9 +1,8 @@
 import math
-from pathlib import Path
 
 
 def load() -> list[list[str]]:
-    default = open(f"{Path(__file__).stem}.txt").readlines()
+    default = open(f"./input/day10.txt").readlines()
     return [list(x.strip()) for x in default]
 
 

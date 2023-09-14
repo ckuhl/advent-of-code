@@ -1,10 +1,8 @@
-from pathlib import Path
-
 from common import IntcodeComputer
 
 
 def load() -> list[int]:
-    default = open(f"{Path(__file__).stem}.txt").readlines()
+    default = open(f"./input/day05.txt").readlines()
     return [int(y) for x in default for y in x.split(",")]
 
 
