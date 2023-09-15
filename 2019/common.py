@@ -11,12 +11,14 @@ class State(enum.Enum):
 class IntcodeComputer:
     def __init__(
             self,
-            program: list[int],
+            program: list[int] | str,
             input_queue: list[int] | None = None,
             log_level: int = logging.WARNING,
     ):
-
-        self.memory: list[int] = program
+        if type(program) == str:
+            self.memory = [int(x) for x in open(program).readline().split(",")]
+        else:
+            self.memory = program
 
         # Internal pointer, should point to current/next instruction
         self.ip: int = 0
