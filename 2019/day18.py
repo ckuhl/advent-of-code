@@ -96,8 +96,6 @@ def solve_keyfind(
     while frontier or next_frontier:
         if not frontier:  # We've reached the end of one iteration of BFS
             frontier, next_frontier = next_frontier, set()
-            # print(f"{steps=}:{len(seen)=}:{max_keys=}:{len(frontier)=}")
-            # print(frontier)
             steps += 1
             continue
 
@@ -131,10 +129,8 @@ def solve_keyfind(
         # If we have found a door...
         elif curr in DOORS:
             needed_key = mapping[state.pos].lower()
-            # print(f"encountered door={curr}, checking for {needed_key=}")
             # ...and it is opened by a key from another sector, continue
             if ignore_unfindable_keys and needed_key not in total_keys:
-                # print(f"{needed_key=} not in {total_keys=}, pretending we can go through")
                 pass
             # ..and we can open it, continue!
             elif needed_key in state.keys:
@@ -149,8 +145,6 @@ def solve_keyfind(
         next_frontier.add(State((state.pos[0], state.pos[1] + 1), new_keys))
         next_frontier.add(State((state.pos[0], state.pos[1] - 1), new_keys))
 
-    # print([v for k, v in mapping.items() if v in KEYS or v in DOORS])
-    # print(mapping)
     raise NotImplementedError(f"Ran out of new steps: Need {total_keys=}, have {max_keys=}")
 
 
@@ -192,19 +186,6 @@ def partition_map(
     return ne, nw, se, sw
 
 
-def print_mapping(mapping: dict[tuple[int, int], str]) -> None:
-    min_x, max_x, min_y, max_y = float("inf"), float("-inf"), float("inf"), float("-inf")
-    for k, v in mapping.items():
-        min_x = min(min_x, k[0])
-        max_x = max(max_x, k[0])
-        min_y = min(min_y, k[1])
-        max_y = max(max_y, k[1])
-    for y in range(min_y, max_y + 1):
-        for x in range(min_x, max_x + 1):
-            print(mapping[(x, y)], end="")
-        print()
-
-
 def part2(stringmap: str | None = None):
     """
     Dumb insight: Tracking multiple players with multiple states is hard.
@@ -218,45 +199,43 @@ def part2(stringmap: str | None = None):
     - We can solve each portion individually, assuming the other droids have already gotten the requisite keys
     - Then we simply sum each quadrant together
     """
-    print("Solving new labrynth", "=" * 65)
     labrynth_sectors = partition_map(array_to_dict(parse_map(stringmap)))
-
     total_distance = 0
+
     for sector in labrynth_sectors:
         sector_start = find_start(sector)
-        print("solving sector", "-" * 70)
-        print_mapping(sector)
         total_distance += solve_keyfind(sector, sector_start, ignore_unfindable_keys=True)
+
     return total_distance
 
 
 if __name__ == "__main__":
-    #     assert part1("""########################
-    # #f.D.E.e.C.b.A.@.a.B.c.#
-    # ######################.#
-    # #d.....................#
-    # ########################""") == 86
-    #     assert part1("""########################
-    # #...............b.C.D.f#
-    # #.######################
-    # #.....@.a.B.c.d.A.e.F.g#
-    # ########################""") == 132
-    #     assert part1("""#################
-    # #i.G..c...e..H.p#
-    # ########.########
-    # #j.A..b...f..D.o#
-    # ########@########
-    # #k.E..a...g..B.n#
-    # ########.########
-    # #l.F..d...h..C.m#
-    # #################""") == 136
-    #     assert part1("""########################
-    # #@..............ac.GI.b#
-    # ###d#e#f################
-    # ###A#B#C################
-    # ###g#h#i################
-    # ########################""") == 81
-    #     assert part1() == 4350
+    assert part1("""########################
+#f.D.E.e.C.b.A.@.a.B.c.#
+######################.#
+#d.....................#
+########################""") == 86
+    assert part1("""########################
+#...............b.C.D.f#
+#.######################
+#.....@.a.B.c.d.A.e.F.g#
+########################""") == 132
+    assert part1("""#################
+#i.G..c...e..H.p#
+########.########
+#j.A..b...f..D.o#
+########@########
+#k.E..a...g..B.n#
+########.########
+#l.F..d...h..C.m#
+#################""") == 136
+    assert part1("""########################
+#@..............ac.GI.b#
+###d#e#f################
+###A#B#C################
+###g#h#i################
+########################""") == 81
+    assert part1() == 4350
     assert part2("""#######
 #a.#Cd#
 ##...##
@@ -265,7 +244,7 @@ if __name__ == "__main__":
 #cB#Ab#
 #######""") == 8
     # FIXME: Why isn't this one 72, as mentioned on the question page?
-    # nb. had to hack this one into single-entry mapping since our solver wants to change that
+    # nb. had to hack this one into single-entry labrynth since our solver wants to change that
     assert part2("""#############
 #g#f.D#..h#l#
 #F###e#E###.#
