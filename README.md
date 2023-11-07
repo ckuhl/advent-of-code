@@ -34,5 +34,5 @@ My solutions for [Advent of Code](https://adventofcode.com/) challenges, by year
 | Day 21     |      |      |      |      |      | **                     |                        |                        |                        |      |
 | Day 22     |      |      |      |      |      | *                      |                        |                        |                        |      |
 | Day 23     |      |      |      |      |      | **                     |                        |                        |                        |      |
-| Day 24     |      |      |      |      |      |                        |                        |                        |                        |      |
+| Day 24     |      |      |      |      |      | **                     |                        |                        |                        |      |
 | Day 25     |      |      |      |      |      |                        |                        |                        |                        |      |
