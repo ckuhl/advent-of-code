@@ -1,7 +1,7 @@
 #lang racket
 
 (define TARGET 2020)
-(define NUMBERS (file->list "2020-12-01.txt"))
+(define NUMBERS (file->list "inputs/01.txt"))
 
 ; The complement that each number will need to sum to TARGET
 (define DUALS (list->set (map (λ (x) (- TARGET x)) NUMBERS)))

@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->lines "2020-12-04.txt"))
+(define LINES (file->lines "inputs/04.txt"))
 
 
 (eprintf "Part 1~n")

@@ -1,7 +1,7 @@
 #lang racket
 
 ; Import lines form
-(define LINES (file->lines "2020-12-03.txt"))
+(define LINES (file->lines "inputs/03.txt"))
 
 ; Wrap string references in a modulo function, to "wrap around"
 (define (string-ref-mod string index)

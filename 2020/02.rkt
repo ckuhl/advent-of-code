@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->lines "2020-12-02.txt"))
+(define LINES (file->lines "inputs/02.txt"))
 
 ; Split string and convert to correct types
 (define (split str)
