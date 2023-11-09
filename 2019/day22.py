@@ -79,7 +79,66 @@ def manipulate_deck(
 
 
 def part1():
+    """FIXME: Part 1 could be rewritten using part 2"""
     return manipulate_deck().index(2019)
+
+
+def linear_function(s: str) -> tuple[int, int]:
+    if s.startswith("deal into new stack"):
+        return -1, -1
+    elif s.startswith("cut "):
+        cut_size = int(s.split(" ")[-1])
+        return 1, -cut_size
+    elif s.startswith("deal with increment"):
+        increment = int(s.split(" ")[-1])
+        return increment, 0
+    else:
+        raise NotImplementedError(f"Unknown action {s=}")
+
+
+def get_sequence(string_or_default: str | None = None):
+    return [linear_function(x) for x in parse(string_or_default)]
+
+
+def compose(first: tuple[int, int], second: tuple[int, int], mod: int) -> tuple[int, int]:
+    """
+    Compose two linear functions:
+    First: (a, b)
+    => ax + b mod n
+    Second: (c, d)
+    => cx + d mod n
+    => c(ax + b) + d mod n
+    => acx + bc + d mod n
+    => (ac mod n, bc+d mod n)
+    """
+    a, b = first
+    c, d = second
+    return (a * c) % mod, (b * c + d) % mod
+
+
+def compose_sequence(sequence: list[tuple[int, int]], mod: int) -> tuple[int, int]:
+    """Now recursively compose these functions together"""
+    first = sequence[0]
+    for second in sequence[1:]:
+        first = compose(first, second, mod)
+    return first
+
+
+def modular_inverse(original: tuple[int, int], mod: int) -> tuple[int, int]:
+    """Shoutout Python for making this easy with negative modular powers"""
+    a, b = original
+    a_inv = pow(a, -1, mod)
+    return a_inv, (-b * a_inv) % mod
+
+
+def modular_exponentiate(original: tuple[int, int], mod: int, iterations: int) -> tuple[int, int]:
+    """
+    This one twisted my brain for a while. Answer written up in part 2 docstring.
+    """
+    a, b = original
+    a_n = pow(a, iterations, mod)
+    b_n = (a_n - 1) * pow(a - 1, mod - 2, mod) * b
+    return a_n, b_n
 
 
 def part2(
@@ -88,27 +147,53 @@ def part2(
         iterations: int = 101_741_582_076_661,
         position: int = 2_020,
 ) -> int:
+    """FIXME: Part 2 should be rewritten to use a modular function class with convenience methods within"""
     """
     So unlike part 1, here we _do_ want the card at a given position.
     This works in our favour - we don't need to track where all the cards are.
-    We want the position of only one card
-
-    Observe: Each iteration will be the same transform. In short, once could imagine that the cards are no longer
-    the cards, but the position of a card once the iteration has completed. In short, if card 0 ends up in position 3
-    and card 3 in position 0 after one iteration, after two iterations they will be in their respective place.
+    We want the position of only one card.
 
     Observe: Both the number of iterations and our deck size are prime. Perhaps there's something here we can work with.
 
-    So we need to reverse the steps:
-    - Undeal: (Symmetric)
-    - Uncut: Add instead of subtract index
-    - Undeal with increment (use Euclidian Algorithm - aha, we can use the primeness of the deck)
+    Also observe: All deck manipulations are linear transforms of the deck. Combining this with the above, we realize
+    that this is all leading towards modular arithmetic.
 
-    Using this we can follow our index over one iteration.
+    Let's look back at part 1 and rewrite our three functions in a modular form:
+    f(x) = ax + b mod c, where:
+        x is the initial card position
+        a, b are variables
+        c is the size of the deck
 
-    Following that: We can likely generalize this up a step to do the same for the number of steps necessary to shuffle.
+    So we can rewrite our actions as linear transforms:
+    - Deal: a = -1, b = -1:       -x -        1 mod c
+    - Cut:  a =  1, b = -cut_size: x - cut_size mod c
+    - Deal with increment: a = increment_size, b = 0: increment_size * x + 0 mod c
     """
-    raise NotImplementedError
+    operations = get_sequence(string_or_default)
+    """
+    Using these we can follow our index over one iteration.
+    """
+    manipulate = compose_sequence(operations, deck_size)
+    """
+    We need to invert this function, as we want to find the _value at an index_; this is where our primes above
+    come in handy. For this step, we use the power of Wikipedia to refresh my memory from university.
+    """
+    reverse_manipulate = modular_inverse(manipulate, deck_size)
+    """
+
+    Further, we can compose these to create _one_ function to immediately give us our index at the next step.
+    Writing out a few steps by hand, we see:
+        f^1(x)       = f(x)     = ax+b mod m                   = a^1x + b mod m
+        f^2(x)    = f(f(x))   = a(ax+b mod m)+b mod m          = a^3x + (a^2+a+1)b mod m
+        f^3(x) = f(f(f(x))) = a(a(ax+b mod m)+b mod m)+b mod m = a^2x + (a+1)b mod m
+    Thus we can generalize this!
+    f^n = a^nx + (a^{n-1} + a^{n-2} + ... + a + 1)b mod m 
+    """
+    a, b = modular_exponentiate(reverse_manipulate, deck_size, iterations)
+    """
+    Finally, we apply our generated function to the inputted card position.
+    """
+    return (a * position + b) % deck_size
 
 
 if __name__ == "__main__":
@@ -119,5 +204,6 @@ if __name__ == "__main__":
     assert manipulate_deck(EXAMPLE2, 10) == [3, 0, 7, 4, 1, 8, 5, 2, 9, 6]
     assert manipulate_deck(EXAMPLE3, 10) == [6, 3, 0, 7, 4, 1, 8, 5, 2, 9]
     assert manipulate_deck(EXAMPLE4, 10) == [9, 2, 5, 8, 1, 4, 7, 0, 3, 6]
+
     assert part1() == 6431
-    print(part2())
+    assert part2() == 100_982_886_178_958

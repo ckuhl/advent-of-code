@@ -7,10 +7,9 @@ sys.setrecursionlimit(10_000_000)
 
 cpu = IntcodeComputer(program="./input/day25.txt")
 
-
-def part1():
+if __name__ == "__main__":
     """
-    Part 1: Pick up items all over.
+    Pick up all the items that don't stop the game; figure this out through trial and error.
 
     Knapsack problem with unknown weights and unknown limit!
     Take: Semiconductor + Candy Cane + Food Ration + Coin + Mouse
@@ -22,13 +21,3 @@ def part1():
         print(message)
         cpu.output_queue = []
         cpu.input_queue = [ord(x) for x in input()] + [ord("\n")]
-
-
-def part2():
-    """TBD"""
-    raise NotImplementedError
-
-
-if __name__ == "__main__":
-    part1()
-    part2()
