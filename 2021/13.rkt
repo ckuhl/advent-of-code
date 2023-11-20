@@ -2,9 +2,9 @@
 
 (require rackunit)
 
-(define LINES (file->lines "2021-12-13.txt"))
+(define LINES (file->lines "input/13.txt"))
 
-(define EXAMPLE (file->lines "example.txt"))
+(define EXAMPLE (file->lines "input/13-example1.txt"))
 
 
 ; ==============================================================================

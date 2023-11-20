@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->lines "2021-12-10.txt"))
+(define LINES (file->lines "input/10.txt"))
 
 
 (define (first-invalid s [acc empty])

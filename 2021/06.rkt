@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->string "2021-12-06.txt"))
+(define LINES (file->string "input/06.txt"))
 
 (define NUMBERS (map string->number (string-split (string-trim LINES) ",")))
 

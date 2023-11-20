@@ -3,7 +3,7 @@
 (require racket/hash)
 
 ; Did I fix the file by manually appending a newline? Absolutely :)
-(define LINES (file->lines "2021-12-04.txt"))
+(define LINES (file->lines "input/04.txt"))
 
 ; List of numbers called in sequence
 (define NUMBERS (map string->number (string-split (first LINES) ",")))

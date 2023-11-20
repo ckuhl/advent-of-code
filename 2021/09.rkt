@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->lines "2021-12-09.txt"))
+(define LINES (file->lines "input/09.txt"))
 
 (define EXAMPLE
   (list

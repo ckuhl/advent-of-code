@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->lines "2021-12-05.txt"))
+(define LINES (file->lines "input/05.txt"))
 
 ; Helper: Convert a string of the form "1,2 -> 3,4" to a list of the form
 ;  (list (list 1 2) (list 3 4))

@@ -1,6 +1,6 @@
 #lang racket
 
-(define LINES (file->lines "2021-12-03.txt"))
+(define LINES (file->lines "input/03.txt"))
 
 ; trie for binary numbers of identical length
 ; trie := (trie . trie) | number | empty

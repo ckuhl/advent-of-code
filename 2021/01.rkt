@@ -1,6 +1,6 @@
 #lang racket
 
-(define NUMBERS (file->list "2021-12-01.txt"))
+(define NUMBERS (file->list "input/01.txt"))
 
 (define (count-sequential-increases lst)
   (count
