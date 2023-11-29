@@ -6,7 +6,7 @@ My solutions for [Advent of Code] challenges, by year and language:
 - [2020] - [Racket], also with a focus on completion
 - [2021] - Racket
 - [2022] - Racket
-- [2023] - [Zig]
+- [2023] - [Lua]
 
 ## Progress
 
@@ -52,5 +52,5 @@ My solutions for [Advent of Code] challenges, by year and language:
 
 [2023]: 2023/README.md
 
-[Zig]: https://ziglang.org/
+[Lua]: https://lua.org/
 
