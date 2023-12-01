@@ -1,16 +1,23 @@
--- Template file to copy-paste for each day
-problem = io.lines("inputs/day00.txt")
-example = io.lines("inputs/day00_example.txt")
+-- Set-up
 
-function BuildArray(...)
-  local arr = {}
-  for v in ... do
-    arr[#arr + 1] = v
-  end
-  return arr
+-- Part 1 ---------------------------------------------------------------------
+
+function part1(fileName)
+	for l in io.lines(fileName) do
+	end
+	return -1
 end
 
-local problem = BuildArray(problem)
-for l = 1, #problem do
-	print(problem[l])
+assert(part1("inputs/00-example1.txt") == 1)
+assert(part1("inputs/00.txt") == 1)
+
+-- Part 2 ---------------------------------------------------------------------
+
+function part2(fileName)
+	for l in io.lines(fileName) do
+	end
+	return -1
 end
+
+assert(part2("inputs/00-example2.txt") == 1)
+assert(part2("inputs/00.txt") == 1)

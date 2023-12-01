@@ -9,3 +9,8 @@ Motivation is equal parts it is kind-of applicable (for scripting [NeoVim], [ngi
 [nginx (via OpenResty)]: https://github.com/openresty/lua-nginx-module#readme
 [LÖVE]: https://www.love2d.org/
 
+
+## Notes
+- Version (`lua -v`): Lua 5.4.6
+- Formatter: StyLua
+
