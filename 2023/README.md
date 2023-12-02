@@ -14,3 +14,17 @@ Motivation is equal parts it is kind-of applicable (for scripting [NeoVim], [ngi
 - Version (`lua -v`): Lua 5.4.6
 - Formatter: StyLua
 
+
+## Notes on Lua
+### Day 1
+- There's no POSIX regex?
+- Regex implementation _seems_ to vary by function?
+    - Or at least, I couldn't get `.-` to work in `string.gfind`
+- Multiple return hurts my brain
+
+
+### Day 2
+- There's no `string.split`???
+- Tables are... interesting. Elegant but also hurt my brain.
+    - Reminds me of PHP "arrays"
+
