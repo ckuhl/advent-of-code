@@ -15,24 +15,14 @@ function isSymbol(str)
 	end
 end
 
-function adjacentSymbols(mapping, px, py)
-	-- Return true if any adjacent symbols (i.e. any non-'.', non-integer characters)
+function isSpecialCharacterAroundRange(mapping, px1, px2, py)
+	-- Check if there is a special character
 	for y = py - 1, py + 1 do
-		for x = px - 1, px + 1 do
+		for x = px1 - 1, px2 + 1 do
 			-- Guard on checking itself
-			if not (y == py and x == px) and isNonSymbol(mapping[tonumber(x) .. ";" .. tonumber(y)]) then
+			if not (y == py and x >= px1 and x <= px2) and isSymbol(mapping[tonumber(x) .. ";" .. tonumber(y)]) then
 				return true
 			end
-		end
-	end
-	return false
-end
-
-function specialCharacterInRange(mapping, px1, px2, py)
-	-- FIXME: Fold this into the above function
-	for x = px1, px2 do
-		if adjacentSymbols(mapping, x, py) then
-			return true
 		end
 	end
 	return false
@@ -45,7 +35,7 @@ function part1(fileName)
 	for l in io.lines(fileName) do
 		y = y + 1
 		for x_start, x_end_past in l:gmatch("()%d+()") do
-			if specialCharacterInRange(mapping, x_start, x_end_past - 1, y) then
+			if isSpecialCharacterAroundRange(mapping, x_start, x_end_past - 1, y) then
 				partsSum = partsSum + tonumber(l:sub(x_start, x_end_past - 1))
 			end
 		end
@@ -71,11 +61,13 @@ function findAdjacentStar(mapping, px1, px2, py)
 end
 
 function part2(fileName)
-	-- 1. Find number.
-	-- 2. If adjacent to '*':
-	-- 2.1. Does star exist in table (i.e. have we already seen a number by this star?)
-	-- 2.1.1. Multiply value by star entry, add to score.
-	-- 2.1.2. Add entry to table (star_pos) = number
+	--[[
+1. Find number.
+2. Is number adjacent to '*'?
+2.1. YES: Does star exist in table (i.e. have we already seen a number by this star?)
+2.1.1. YES: Multiply value by star entry, add to score.
+2.1.2. NO: Add entry to table (star_pos) = number
+	--]]
 	local mapping = aoc.fileToPoints(fileName)
 	local stars = {}
 	local gearRatioSum = 0
@@ -91,7 +83,7 @@ function part2(fileName)
 					stars[pos] = number
 				else
 					gearRatioSum = gearRatioSum + stars[pos] * number
-					-- Set the star position to a sentinel to ensure there's no three-number stars
+					-- Guard: Overwrite the star value to a sentinel, proving there's no three-number stars
 					stars[pos] = 0 / 0
 				end
 			end
