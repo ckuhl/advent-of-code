@@ -44,4 +44,10 @@ fun to use [LÖVE].
     - Every piece of code has a few more lines of boilerplate
 - That being said... dang, Lua is _fast_!
     - According to hyperfine, solving day three (and the examples) takes... 21.8ms!
- 
+
+### Day 4
+
+- There's no sets? Well, no built-in sets
+- Instead: use a table with the keys as your items, and the values as `true`
+    - I am told this is how Awk and Perl, languages that scare me, also did it
+    - Ditto again for versions of Java older than I am
