@@ -4,7 +4,14 @@ local aoc = {}
 function aoc.dumpTable(t)
 	local s = "{ "
 	for k, v in pairs(t) do
-		s = s .. "[" .. tostring(k) .. "] = " .. tostring(v) .. ", "
+		local stringK = tostring(k)
+		local stringV
+		if type(v) == "table" then
+			stringV = aoc.dumpTable(v)
+		else
+			stringV = tostring(v)
+		end
+		s = s .. "[" .. stringK .. "] = " .. stringV .. ", "
 	end
 	s = s .. "}"
 	return s
@@ -25,6 +32,14 @@ function aoc.tableUpdate(into, from)
 		into[k] = v
 	end
 	return into
+end
+
+function aoc.tableSize(t)
+	local count = 0
+	for _, __ in pairs(t) do
+		count = count + 1
+	end
+	return count
 end
 
 --- Helper: Split string into table based on given separator (or spaces if not separator given)
