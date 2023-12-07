@@ -10,6 +10,23 @@ function aoc.dumpTable(t)
 	return s
 end
 
+function aoc.tableMin(t)
+	local soFar = nil
+	for _, v in pairs(t) do
+		if soFar == nil or soFar > v then
+			soFar = v
+		end
+	end
+	return soFar
+end
+
+function aoc.tableUpdate(into, from)
+	for k, v in pairs(from) do
+		into[k] = v
+	end
+	return into
+end
+
 --- Helper: Split string into table based on given separator (or spaces if not separator given)
 function aoc.split(inputString, sep)
 	if sep == nil then

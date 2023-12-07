@@ -51,3 +51,17 @@ fun to use [LÖVE].
 - Instead: use a table with the keys as your items, and the values as `true`
     - I am told this is how Awk and Perl, languages that scare me, also did it
     - Ditto again for versions of Java older than I am
+
+## Day 5
+
+- Parsing in complex input: I need to think harder about how to do this well.
+
+## Day 6
+
+- Parallel iteration: Not there!
+- Today's input is exactly two lists of integers
+- What I want is to read the first of each list together
+    - In Python terms, zip two lists together
+- This isn't really directly achievable
+- I could've made a table of tables
+- Instead, I made two tables and iterated through them by increment
