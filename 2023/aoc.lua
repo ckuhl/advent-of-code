@@ -27,6 +27,16 @@ function aoc.tableMin(t)
 	return soFar
 end
 
+function aoc.tableMax(t)
+	local soFar = nil
+	for _, v in pairs(t) do
+		if soFar == nil or soFar < v then
+			soFar = v
+		end
+	end
+	return soFar
+end
+
 function aoc.tableUpdate(into, from)
 	for k, v in pairs(from) do
 		into[k] = v

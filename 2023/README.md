@@ -65,3 +65,16 @@ fun to use [LÖVE].
 - This isn't really directly achievable
 - I could've made a table of tables
 - Instead, I made two tables and iterated through them by increment
+
+## Day 7
+
+...
+
+## Day 8
+
+- Getting enough of my sea legs to no longer be flapped by odd lua behaviour
+- Now observing second patterns I didn't in my first observations
+- First among them:
+    - Never, ever write an else case
+    - Write if / elseif / elseif / etc. to match _all known cases_
+    - Throw an error if you get to `else`!
