@@ -8,6 +8,8 @@ function aoc.dumpTable(t)
 		local stringV
 		if type(v) == "table" then
 			stringV = aoc.dumpTable(v)
+		elseif type(v) == "string" then
+			stringV = "\"" .. v .. "\""
 		else
 			stringV = tostring(v)
 		end
@@ -35,6 +37,13 @@ function aoc.tableMax(t)
 		end
 	end
 	return soFar
+end
+
+function aoc.tableAppend(left, right)
+	for i = 1, #right do
+		left[#left + i] = right[i]
+	end
+	return left
 end
 
 function aoc.tableUpdate(into, from)
