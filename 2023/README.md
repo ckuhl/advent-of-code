@@ -78,3 +78,10 @@ fun to use [LÖVE].
     - Never, ever write an else case
     - Write if / elseif / elseif / etc. to match _all known cases_
     - Throw an error if you get to `else`!
+
+## Day 9
+
+- Today is the first day where the mutability of tables tripped me up
+    - Perhaps I am getting lazy with my creation / management of them?
+    - Tables are mutable within functions.
+    - Need to determine how to copy instead of loading input once for each part
