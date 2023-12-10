@@ -1,7 +1,7 @@
 -- Set-up
 aoc = require("aoc")
 
-scores = {
+part1Scores = {
 	["A"] = 14,
 	["K"] = 13,
 	["Q"] = 12,
@@ -17,18 +17,35 @@ scores = {
 	["2"] = 2,
 }
 
+part2Scores = {
+	["A"] = 13,
+	["K"] = 12,
+	["Q"] = 11,
+	["T"] = 10,
+	["9"] = 9,
+	["8"] = 8,
+	["7"] = 7,
+	["6"] = 6,
+	["5"] = 5,
+	["4"] = 4,
+	["3"] = 3,
+	["2"] = 2,
+	["J"] = 1,
+}
+
 --- Given a string of the form "A428J", convert it to a table of numbers
-function stringToHand(str)
+function stringToHand(str, useJokers)
+	local lookup = useJokers and part2Scores or part1Scores
 	local t = {}
 	for i = 1, #str do
 		local c = str:sub(i, i)
-		t[i] = scores[c]
+		t[i] = lookup[c]
 	end
 	return t
 end
 
 --- First part of scoring: Determining the hand _type_
-function handToType(hand)
+function handToType(hand, usingJokers)
 	local handCount = {}
 	for _, v in pairs(hand) do
 		local prev = handCount[v]
@@ -37,6 +54,30 @@ function handToType(hand)
 		else
 			handCount[v] = prev + 1
 		end
+	end
+
+	if usingJokers then
+		print(aoc.dumpTable(handCount))
+		local jokerCount = handCount[part2Scores.J]
+		if jokerCount == nil then
+			jokerCount = 0
+		end
+		print('jc', jokerCount)
+		if jokerCount == 5 then
+			return 7
+		end
+
+		handCount[part2Scores.J] = nil
+		local bestCard
+		for k, v in pairs(handCount) do
+			if bestCard == nil then
+				bestCard = k
+			elseif v > handCount[bestCard] then
+				bestCard = k
+			end
+		end
+		handCount[bestCard] = handCount[bestCard] + jokerCount
+		handCount["J"] = nil
 	end
 
 	local uniqueCards = aoc.tableSize(handCount)
@@ -72,11 +113,11 @@ function handToType(hand)
 	end
 end
 
-function handLessThan(left, right)
+function handLessThan(left, right, useJokers)
 	local leftStr = left[1]
 	local rightStr = right[1]
-	local leftType = handToType(stringToHand(leftStr))
-	local rightType = handToType(stringToHand(rightStr))
+	local leftType = handToType(stringToHand(leftStr, useJokers), useJokers)
+	local rightType = handToType(stringToHand(rightStr, useJokers), useJokers)
 	if leftType < rightType then
 		return true
 	elseif leftType > rightType then
@@ -84,8 +125,14 @@ function handLessThan(left, right)
 	end
 	-- Special case: left == right, compare cards
 	for i = 1, #leftStr do
-		local leftCharScore = scores[leftStr:sub(i, i)]
-		local rightCharScore = scores[rightStr:sub(i, i)]
+		local leftCharScore, rightCharScore
+		if useJokers == true then
+			leftCharScore = part2Scores[leftStr:sub(i, i)]
+			rightCharScore = part2Scores[rightStr:sub(i, i)]
+		else
+			leftCharScore = part1Scores[leftStr:sub(i, i)]
+			rightCharScore = part1Scores[rightStr:sub(i, i)]
+		end
 		if leftCharScore < rightCharScore then
 			return true
 		elseif leftCharScore > rightCharScore then
@@ -122,22 +169,28 @@ function part1(fileName)
 end
 
 assert(part1("inputs/07-example1.txt") == 6440)
-print(part1("inputs/07.txt"))
 assert(part1("inputs/07.txt") == 251927063)
 
 -- Part 2 ---------------------------------------------------------------------
 
---[[ TODO: Handle wild cards tomorrow
+--[[
 My lazy thinking: For each J, swap _all possible values_
 Or lazy thinking 2: Precompute all possible best-hands for partial hands.
 i.e. if you have a partial hand of three, and a pair, the best you can have is
 four of a kind (since the other two would be jokers).
 --]]
 function part2(fileName)
-	for l in io.lines(fileName) do
+	local inputHands = formatInputHands(fileName)
+	table.sort(inputHands, function(l, r)
+		handLessThan(l, r, true)
+	end)
+
+	local totalWinnings = 0
+	for i, bid in ipairs(inputHands) do
+		totalWinnings = totalWinnings + i * tonumber(bid[2])
 	end
-	return -1
+	return totalWinnings
 end
 
-assert(part2("inputs/07-example1.txt") == 1)
-assert(part2("inputs/07.txt") == 1)
+assert(part2("inputs/07-example1.txt") == 5905)
+assert(part2("inputs/07.txt") == 255632664)

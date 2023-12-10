@@ -68,7 +68,8 @@ fun to use [LÖVE].
 
 ## Day 7
 
-...
+- Today, in "Lua doesn't have" default arguments
+    - Man that would be nice to have for setting flags on Part 2
 
 ## Day 8
 
