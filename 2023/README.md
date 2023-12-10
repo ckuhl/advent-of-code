@@ -52,11 +52,11 @@ fun to use [LÖVE].
     - I am told this is how Awk and Perl, languages that scare me, also did it
     - Ditto again for versions of Java older than I am
 
-## Day 5
+### Day 5
 
 - Parsing in complex input: I need to think harder about how to do this well.
 
-## Day 6
+### Day 6
 
 - Parallel iteration: Not there!
 - Today's input is exactly two lists of integers
@@ -71,7 +71,7 @@ fun to use [LÖVE].
 - Today, in "Lua doesn't have" default arguments
     - Man that would be nice to have for setting flags on Part 2
 
-## Day 8
+### Day 8
 
 - Getting enough of my sea legs to no longer be flapped by odd lua behaviour
 - Now observing second patterns I didn't in my first observations
@@ -80,9 +80,16 @@ fun to use [LÖVE].
     - Write if / elseif / elseif / etc. to match _all known cases_
     - Throw an error if you get to `else`!
 
-## Day 9
+### Day 9
 
-- Today is the first day where the mutability of tables tripped me up
+- Today is the first day wherein the mutability of tables tripped me up
     - Perhaps I am getting lazy with my creation / management of them?
     - Tables are mutable within functions.
     - Need to determine how to copy instead of loading input once for each part
+
+### Day 10
+
+- Today is the day I give in: I need my creature comforts of non-Table data classes
+    - Implemented a rudimentary `set` class (in `set.lua`) to track members of the loop
+    - I have already implemented it once
+    - Might as well do it once _well_ instead of repeating until I make an error
