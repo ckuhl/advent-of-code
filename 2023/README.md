@@ -93,3 +93,5 @@ fun to use [LÖVE].
     - Implemented a rudimentary `set` class (in `set.lua`) to track members of the loop
     - I have already implemented it once
     - Might as well do it once _well_ instead of repeating until I make an error
+- Somehow in Part 1 I committed an excellent error
+    - That then worked until part 2

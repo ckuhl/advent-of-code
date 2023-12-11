@@ -38,6 +38,17 @@ function Set.remove(self, item)
 end
 
 ---
+--- Return the number of elements in the set
+---@return number
+function Set.size(self)
+	local count = 0
+	for _, _ in pairs(self.inner) do
+		count = count + 1
+	end
+	return count
+end
+
+---
 --- Test if the element contains a given element.
 ---@param item any
 ---@return boolean
