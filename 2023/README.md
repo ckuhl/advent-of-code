@@ -96,8 +96,14 @@ fun to use [LÖVE].
 - Somehow in Part 1 I committed an excellent error
     - That then worked until part 2
 
-
 ### Day 11
+
 - Today is the first day I really had to twist my brain
     - The offset business meant I could not just return to the standard "mapping of points"
     - Instead I needed to track the actual integer points so I could track their offsets
+
+## Day 12
+
+- Finally got the hang of Lua Regular Expressions, kinda
+    - Part 1: Use the fact that Lua is fast-ish to brute force
+    - Now I'm hooped for part 2...
