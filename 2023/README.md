@@ -95,3 +95,9 @@ fun to use [LÖVE].
     - Might as well do it once _well_ instead of repeating until I make an error
 - Somehow in Part 1 I committed an excellent error
     - That then worked until part 2
+
+
+### Day 11
+- Today is the first day I really had to twist my brain
+    - The offset business meant I could not just return to the standard "mapping of points"
+    - Instead I needed to track the actual integer points so I could track their offsets
