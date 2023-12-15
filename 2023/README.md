@@ -107,3 +107,19 @@ fun to use [LÖVE].
 - Finally got the hang of Lua Regular Expressions, kinda
     - Part 1: Use the fact that Lua is fast-ish to brute force
     - Now I'm hooped for part 2...
+
+## Day 13
+
+- I think around day 11 or 12 I realized I will endeavor solely to get part 1 done
+    - If I get part 2 done, bonus!
+    - However for the purpose of realtime competition, I will be content with part 1
+
+## Day 14
+
+- TBD
+
+## Day 15
+
+- First part was relatively easy!
+- Second part has me thinking "wow, maybe it's time for a wee little bit of object-oriented programming"
+    - But instead (maybe due to past experience?) I am making it a function that takes a class-ish partial
