@@ -116,7 +116,12 @@ fun to use [LÖVE].
 
 ## Day 14
 
-- TBD
+- Part 1: Lua's smaller implementation means you have to do more yourself
+    - Or at least, think more about how to do things.
+    - This resulted in my chasing around bugs due to my logic for "tilting" the array
+    - Specifically: splitting around `#` square boulders, especially at the starts and ends of rows
+- Part 2: Some good old-fashioned "well yeah it's a hack, but it works"
+    - Why get fancy caching our intermediate states when we can just run from the start a second time?
 
 ## Day 15
 

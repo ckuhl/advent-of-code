@@ -9,7 +9,7 @@ function aoc.dumpTable(t)
 		if type(v) == "table" then
 			stringV = aoc.dumpTable(v)
 		elseif type(v) == "string" then
-			stringV = "\"" .. v .. "\""
+			stringV = '"' .. v .. '"'
 		else
 			stringV = tostring(v)
 		end
@@ -87,6 +87,14 @@ function aoc.fileToPoints(fileName)
 		end
 	end
 	return t
+end
+
+function aoc.reverse(array)
+	local r = {}
+	for i = #array, 1, -1 do
+		table.insert(r, array[i])
+	end
+	return r
 end
 
 return aoc
