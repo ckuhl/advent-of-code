@@ -41,17 +41,51 @@ assert(part1("inputs/15.txt") == 517551)
 function extractValueLabelLength(str)
 	local label = str:match("^([^=%-]+)")
 	local focalLength = str:match("([^=%-]+)$")
-	local boxValue = HashAlgorithm(str)
+	local boxValue = HashAlgorithm(label)
 	return boxValue, label, focalLength
 end
 
+-- Partial lens array: Table of drawer : arrays of {lensLabel, lensFocus}
 function HashmapAlgorithm(str, partialLensArray)
-	local value, label, length = extractValueLabelLength(str)
-	error("TODO, implement rest")
+	local drawerOffset, label, lens = extractValueLabelLength(str)
+	local drawer = partialLensArray[drawerOffset] or {}
+
+	if lens ~= nil then
+		-- Case: `=` operation, insert or update
+		local newItem = { label, tonumber(lens) }
+		local wasUpdated = false
+		for i, item in ipairs(drawer) do
+			if item[1] == label then
+				drawer[i] = newItem
+				wasUpdated = true
+				break
+			end
+		end
+		if not wasUpdated then
+			table.insert(drawer, newItem)
+		end
+	else
+		-- Case: `-` operation, remove element if it exists
+		for i, item in ipairs(drawer) do
+			if item[1] == label then
+				table.remove(drawer, i)
+				break
+			end
+		end
+	end
+
+	partialLensArray[drawerOffset] = drawer
+	return partialLensArray
 end
 
 function focusingPower(lensArray)
-	error("TODO: Calculate focusing power")
+	local power = 0
+	for i, drawer in pairs(lensArray) do
+		for j, lens in ipairs(drawer) do
+			power = power + (i + 1) * j * lens[2]
+		end
+	end
+	return power
 end
 
 function part2(fileName)
@@ -60,9 +94,8 @@ function part2(fileName)
 	for _, v in ipairs(inputs) do
 		lensArray = HashmapAlgorithm(v, lensArray)
 	end
-	print(fileName, focusingPower(lensArray))
 	return focusingPower(lensArray)
 end
 
 assert(part2("inputs/15-example1.txt") == 145)
-assert(part2("inputs/15.txt") == 1)
+assert(part2("inputs/15.txt") == 286097)

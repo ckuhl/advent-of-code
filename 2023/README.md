@@ -123,3 +123,4 @@ fun to use [LÖVE].
 - First part was relatively easy!
 - Second part has me thinking "wow, maybe it's time for a wee little bit of object-oriented programming"
     - But instead (maybe due to past experience?) I am making it a function that takes a class-ish partial
+- On completing part 2, it turns out you can accomplish it just fine using a function that operates on partial
