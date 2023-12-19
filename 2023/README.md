@@ -129,3 +129,24 @@ fun to use [LÖVE].
 - Second part has me thinking "wow, maybe it's time for a wee little bit of object-oriented programming"
     - But instead (maybe due to past experience?) I am making it a function that takes a class-ish partial
 - On completing part 2, it turns out you can accomplish it just fine using a function that operates on partial
+
+## Day 16
+
+- TBD
+
+## Day 17
+
+- TBD
+
+## Day 18
+
+- TBD
+
+## Day 19
+
+- Surprisingly easy!
+    - Part 1 is, at least. And I have a plan for part 2.
+    - It feels likes the challenges that map better to Lua's small standard library (e.g. strings and maps, instead of
+      sets and queues) are the ones I can better approach
+    - Previously I have considered writing myself a standard library, and every day I am more confident I should have
+      done that from the start
