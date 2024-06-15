@@ -19,6 +19,21 @@ function aoc.dumpTable(t)
 	return s
 end
 
+-- Helper: Check two tables for equality
+function aoc.tableEqual(t1, t2)
+	if #t1 ~= #t2 then
+		return false
+	end
+
+	for k, v in pairs(t1) do
+		if t2[k] ~= v then
+			return false
+		end
+	end
+
+	return true
+end
+
 function aoc.tableMin(t)
 	local soFar = nil
 	for _, v in pairs(t) do

@@ -70,6 +70,85 @@ assert(part1("inputs/05.txt") == 993500720)
 
 -- Part 2 ---------------------------------------------------------------------
 
+local Range = {}
+
+function Range:new(startInclusive, stopInclusive, offset)
+	if startInclusive > stopInclusive then
+		return nil
+	end
+	local o = {
+		startInclusive = startInclusive,
+		stopInclusive = stopInclusive,
+		offset = offset,
+	}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+
+function Range:shift(offset)
+	self.startInclusive = self.startInclusive + offset
+	self.stopInclusive = self.stopInclusive + offset
+	return self
+end
+
+function Range:overlap(otherRange)
+	if self.stopInclusive < otherRange.startInclusive then
+		return nil
+	elseif self.startInclusive > otherRange.stopInclusive then
+		return nil
+	else
+		return Range:new(
+				math.max(self.startInclusive, otherRange.startInclusive),
+				math.min(self.stopInclusive, otherRange.stopInclusive)
+		)
+	end
+end
+
+assert(Range:new(10, 20):overlap(Range:new(30, 40)) == nil)
+assert(Range:new(30, 40):overlap(Range:new(10, 20)) == nil)
+assert(aoc.tableEqual(
+		Range:new(5, 20):overlap(Range:new(10, 15)),
+		Range:new(10, 15))
+)
+
+assert(aoc.tableEqual(
+		Range:new(10, 15):overlap(Range:new(5, 20)),
+		Range:new(10, 15))
+)
+assert(aoc.tableEqual(
+		Range:new(5, 15):overlap(Range:new(10, 20)),
+		Range:new(10, 15))
+)
+assert(aoc.tableEqual(
+		Range:new(10, 20):overlap(Range:new(5, 15)),
+		Range:new(10, 15))
+)
+
+function Range:partition(otherRange)
+	--- Tricky one: We want to break _this_ range over the other range
+	--- i.e. we want to end up with one-to-three ranges, breaking at the points in the other range
+	--- With the _middle_ range containing
+	local left, centre, right
+	if self.stopInclusive < otherRange.startInclusive then
+		return self, nil, nil
+	elseif self.startInclusive > otherRange.stopInclusive then
+		return nil, nil, self
+	elseif self.startInclusive >= otherRange.startInclusive and self.stopInclusive <= otherRange.stopInclusive then
+		centre = self
+	elseif self.startInclusive <= otherRange.startInclusive or self.stopInclusive >= otherRange.stopInclusive then
+		centre = self:overlap(otherRange)
+		left = Range:new(self.startInclusive, centre.startInclusive - 1)
+		right = Range:new(centre.stopInclusive + 1, self.stopInclusive)
+	end
+
+	if centre then
+		centre = centre:shift(otherRange.offset)
+	end
+
+	return left, centre, right
+end
+
 function parseSeedRanges(lines)
 	local seeds = {}
 	local i = 0
@@ -77,7 +156,7 @@ function parseSeedRanges(lines)
 		i = i + 1
 		local start = tonumber(a)
 		local offset = tonumber(b)
-		seeds[i] = { ["left"] = start, ["right"] = start + offset - 1 }
+		seeds[i] = Range:new(start, start + offset - 1)
 	end
 	return seeds
 end
@@ -99,90 +178,42 @@ function parseMappings(lines)
 				local dest_start = tonumber(a)
 				local source_start = tonumber(b)
 				local range = tonumber(c)
-				acc[#acc + 1] = {
-					["srcL"] = source_start,
-					["srcR"] = source_start + range,
-					["offset"] = dest_start - source_start,
-				}
+				acc[#acc + 1] = Range:new(
+						source_start,
+						source_start + range - 1,
+						dest_start - source_start
+				)
 			end
 		end
 	end
+	chunks[#chunks + 1] = acc
 	return chunks
 end
 
---[[
-Given a single seed range [start, stop] and a single translation range [srcStart, srcEnd, destStart, destEnd]
-Apply any relevant translations, returning an array of ranges (due to overlaps)
-We have 4 unique cases to consider:
-1. Translation range does not overlap with seed range (left or right).
-2. Seed range entirely within translation range.
-3. Translation range partially overlaps (left, right, or both - is smaller than seed range)
-
-Return two results:
-1. New ranges from modified range.
-2. Single range, if unmodified, or empty if modified.
---]]
-function singleRangeTranslation(seed, mappedRange)
-	if seed.right < mappedRange.srcL then
-		-- Case 1: Seed range entirely left of translation range
-		return { }, seed
-	elseif seed.left > mappedRange.srcR then
-		-- Case 1: Seed range entirely right of translation range
-		return { }, seed
-	elseif seed.left >= mappedRange.srcL and seed.right <= mappedRange.srcR then
-		-- Case 2: Seed range entirely within translation range
-		return { { ["left"] = seed.left + mappedRange.offset, ["right"] = seed.right + mappedRange.offset } }, nil
-	else
-		local seeds = {}
-		-- Case 3: Partial overlap
-		-- 1. Do inner range.
-		seeds[1] = {
-			["left"] = math.max(seed.left, mappedRange.srcL) + mappedRange.offset,
-			["right"] = math.min(seed.right, mappedRange.srcR) + mappedRange.offset,
-		}
-		-- 2. If left overlap, do left outer range.
-		if seed.left < mappedRange.srcL then
-			seeds[2] = {
-				["left"] = seed.left,
-				["right"] = mappedRange.srcL - 1,
-			}
+function mappingTranslation(seeds, mappings)
+	local unmappedSeeds = seeds
+	local mappedSeeds = {}
+	for _, m in ipairs(mappings) do
+		local seedsAcc = {}
+		for _, s in pairs(unmappedSeeds) do
+			l, c, r = s:partition(m)
+			-- Clever idea: Inserting nil is a no-op so we don't need to check which values were returned
+			table.insert(mappedSeeds, c)
+			table.insert(seedsAcc, l)
+			table.insert(seedsAcc, r)
 		end
-		-- 3. If right overlap, do right outer range.
-		if seed.right > mappedRange.srcR then
-			seeds[#seeds + 1] = {
-				["left"] = mappedRange.srcR + 1,
-				["right"] = seed.right,
-			}
-		end
-		return seeds, nil
+		unmappedSeeds = seedsAcc
+		seedsAcc = {}
 	end
+	for i = 1, #unmappedSeeds do
+		table.insert(mappedSeeds, unmappedSeeds[i])
+	end
+	return mappedSeeds
 end
 
--- Given a series of ranges and a _series_ of mappings, apply all translation. Return the range(s).
-function wholeMappingTranslation(inputRanges, mappings)
-	local outputRanges = {}
-	for i, range in ipairs(inputRanges) do
-		for j, mapping in ipairs(mappings) do
-			local modified
-			if range ~= nil then
-				modified, range = singleRangeTranslation(range, mapping)
-			end
-			if modified ~= nil and #modified ~= 0 then
-				outputRanges = aoc.tableAppend(outputRanges, modified)
-				range = nil
-			end
-		end
-		if range ~= nil then
-			outputRanges[#outputRanges + 1] = range
-		end
-	end
-	return outputRanges
-end
-
--- Given a series of ranges and _all_ mappings, apply each mapping block. Return the final ranges.
-function allMappingTranslation(seeds, mappings)
-	for i = 1, #mappings do
-		seeds = wholeMappingTranslation(seeds, mappings[i])
+local function allMappingTranslation(seeds, mappings)
+	for _, m in ipairs(mappings) do
+		seeds = mappingTranslation(seeds, m)
 	end
 	return seeds
 end
@@ -191,13 +222,12 @@ function part2(fileName)
 	local inputTable = loadFile(fileName)
 	local seeds = parseSeedRanges(inputTable)
 	local mappings = parseMappings(inputTable)
-
 	local result = allMappingTranslation(seeds, mappings)
 
 	local smallest = 1 / 0
 	for r = 1, #result do
-		if result[r].left < smallest then
-			smallest = result[r].left
+		if result[r].startInclusive < smallest then
+			smallest = result[r].startInclusive
 		end
 	end
 	print(fileName, smallest)
@@ -205,4 +235,4 @@ function part2(fileName)
 end
 
 assert(part2("inputs/05-example1.txt") == 46)
-assert(part2("inputs/05.txt") == 1)
+assert(part2("inputs/05.txt") == 4917124)

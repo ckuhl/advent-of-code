@@ -55,6 +55,10 @@ fun to use [LÖVE].
 ### Day 5
 
 - Parsing in complex input: I need to think harder about how to do this well.
+- Part 2:
+  - Wow, part 2 was very hard to do using just tables.
+  - Using an actual class made it much easier to manage.
+  - Also, useful variable names (e.g. `inclusiveStart` instead of `left`) helped avoid confusion.
 
 ### Day 6
 
