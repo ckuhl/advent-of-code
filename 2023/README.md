@@ -56,9 +56,9 @@ fun to use [LÖVE].
 
 - Parsing in complex input: I need to think harder about how to do this well.
 - Part 2:
-  - Wow, part 2 was very hard to do using just tables.
-  - Using an actual class made it much easier to manage.
-  - Also, useful variable names (e.g. `inclusiveStart` instead of `left`) helped avoid confusion.
+    - Wow, part 2 was very hard to do using just tables.
+    - Using an actual class made it much easier to manage.
+    - Also, useful variable names (e.g. `inclusiveStart` instead of `left`) helped avoid confusion.
 
 ### Day 6
 
@@ -114,9 +114,10 @@ fun to use [LÖVE].
 
 ## Day 13
 
-- I think around day 11 or 12 I realized I will endeavor solely to get part 1 done
-    - If I get part 2 done, bonus!
-    - However for the purpose of realtime competition, I will be content with part 1
+- Getting back into Advent of Code after, oh, eight months off?
+- The hardest part of part 1 was sorting through what mattered and what didn't
+    - what data structures would work, or not
+    - what level of efficiency would matter, or not
 
 ## Day 14
 
