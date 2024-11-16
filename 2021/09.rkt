@@ -1,5 +1,7 @@
 #lang racket
 
+(require rackunit)
+
 (define LINES (file->lines "input/09.txt"))
 
 (define EXAMPLE
@@ -80,84 +82,61 @@
           0))
     (grid-points (string-length (first heightmap)) (length heightmap)))))
 
-(sum-low-points LINES)
+(check-equal? (sum-low-points EXAMPLE) 15)
+(check-equal? (sum-low-points LINES) 518)
 
 ; ==============================================================================
 (printf "Part 2~n")
 
-; Basin discovery algorithm:
-; 1. Select a point
-; 2. If the point < 9, this is in a basin.
-;    a. Given a set of points in a basin, select all neighbours of those points
-;    b. Those neighbours form the frontier. Remove all points that are 9.
-;    c. If the frontier is empty, you've exhausted the basin.
+; Shortcut: We don't care about height _unless_ it's a basin wall, in which case
+; we exclude it. So we can filter here and operate on a set of just points,
+; simplifying the problem we deal with
+; (list str) -> (set (number . number))
+(define (input->point-set input)
+  (for*/set ([x (in-range (string-length (first input)))]
+             [y (in-range (length input))]
+             #:unless (equal? (string-ref (list-ref input y) x) #\9))
+    (cons x y)))
 
-(define points (grid-points (string-length (first EXAMPLE)) (length EXAMPLE)))
-
-; Remove invalid points from a list of points
-;  i.e. those outside of the given range
-(define (remove-invalid heightmap max-x max-y)
+; Given a point and our list of points, return any cardinal neighbours (i.e.
+; NSEW) of the point that are in the set of points.
+(define (neighbours valid-points pt)
   (filter
-   (lambda (p)
-     (cond
-       [(< (first p) 0) #f]
-       [(< (second p) 0) #f]
-       [(>= (first p) max-x) #f]
-       [(>= (second p) max-y) #f]
-       [else #t]))
-   heightmap))
+   (lambda (x) (set-member? valid-points x))
+   (list
+    (cons (+ (car pt) 1) (cdr pt))
+    (cons (- (car pt) 1) (cdr pt))
+    (cons (car pt) (+ (cdr pt) 1))
+    (cons (car pt) (- (cdr pt) 1)))))
 
-; Given a list of all points, and a set of points already in the group.
-(define (frontier heightmap st in-set)
-  (define all-neighbours
-    (list->set
-     (apply
-      append
-      (map
-       (lambda (x) (remove-invalid (get-neighbouring-points (first x) (second x)) (string-length (first heightmap)) (length heightmap)))
-       (set->list in-set)))))
-  (set-subtract all-neighbours in-set))
+; Simple breadth-first search. Add points to the queue of points to inspect,
+; returning a list of all points inspected.
+(define (bfs queue rest)
+  (if (empty? queue)
+      empty
+      (let [(neighbour (neighbours rest (first queue)))]
+        (cons (first queue)
+              (bfs
+               (append (cdr queue) neighbour)
+               (set-subtract rest (list->set neighbour)))))))
 
+; Given a set of all points to inspect (i.e. our height map), find all pools and
+; return a list of sets of points in each pool.
+;
+; nb. I don't love the list->set here but I don't feel like rewriting bfs above
+;     as a fold or something that would avoid needing this here.
+(define (largest-pools lava-map)
+  (if (set-empty? lava-map)
+      empty
+      (let ([pool (list->set (bfs (list (set-first lava-map)) lava-map))])
+        (cons pool (largest-pools (set-subtract lava-map pool))))))
 
-(define (remove-maxima heightmap pts)
-  (list->set
-   (filter
-    (lambda (p) (not (= 9 (get-location heightmap (first p) (second p)))))
-    (set->list pts))))
+; Finally, put it all together - get our points that are basins, find the size
+; of each pool, then multiple the three largest basin sizes.
+(define (solve-part-2 input)
+  (let* ([basin-points (input->point-set input)]
+         [pool-sizes (map set-count (largest-pools basin-points))])
+    (apply * (take (sort pool-sizes >) 3))))
 
-; Starting from a single point, return the basin around it
-(define (find-basin heightmap points acc)
-  (define front (remove-maxima EXAMPLE (frontier heightmap points acc)))
-  
-  (if (set-empty? front) acc (find-basin heightmap points (set-union acc front))))
-
-
-; Return a basin given an input point to start growing it around.
-;  If the initial point is high point, return an empty set.
-(define (get-basin heightmap pts pt)
-  (if (= 9 (get-location heightmap (first pt) (second pt)))
-      (set)
-      (find-basin heightmap pts (list->set (list pt)))))
-
-; FIXME: This doesn't handle the case of multiple low points within one basin
-; TO fix that, we will need to remove all points in each basin from the list of low points
-(define (get-all-basins heightmap)
-  (map (lambda (x) (get-basin heightmap points x))
-       (get-low-points heightmap)))
-
-; Algorithm for calculating answer to part two:
-;  Multiply together the size of the largest three basins
-(define (multiply-top3-basin-sizes heightmap)
-  (apply
-   *
-   (map
-    (lambda (x) (length (set->list x)))
-    (take
-     (sort
-      (get-all-basins heightmap)
-      (lambda (x y) (> (length (set->list x)) (length (set->list y)))))
-     3))))
-
-(get-all-basins LINES)
-
-(multiply-top3-basin-sizes LINES)
+(check-equal? (solve-part-2 EXAMPLE) 1134)
+(check-equal? (solve-part-2 LINES) 949905)

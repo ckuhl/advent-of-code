@@ -21,7 +21,7 @@ My solutions for [Advent of Code] challenges, by year and language:
 | Day 06     |      |      |      |      |      | **     | **     | **     | **     | **     |        |
 | Day 07     |      |      |      |      |      | **     | **     | **     | **     | **     |        |
 | Day 08     |      |      |      |      |      | **     | **     | **     | *      | *      |        |
-| Day 09     |      |      |      |      |      | **     | **     | *      |        | **     |        |
+| Day 09     |      |      |      |      |      | **     | **     | **     |        | **     |        |
 | Day 10     |      |      |      |      |      | **     | **     | *      | **     | **     |        |
 | Day 11     |      |      |      |      |      | **     | **     |        |        | **     |        |
 | Day 12     |      |      |      |      |      | **     | **     | *      |        | *      |        |
@@ -53,7 +53,6 @@ My solutions for [Advent of Code] challenges, by year and language:
 
 [2023]: 2023/README.md
 
-[2023]: 2024/README.md
+[2024]: 2024/README.md
 
 [Lua]: https://lua.org/
-
