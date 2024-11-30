@@ -1,5 +1,14 @@
 # Racket temporary files (usually created by DrRacket)
 *.rkt~
 *.rkt#1#
+
 # General macOS files
 .DS_Store
+
+# Python development
+.venv/
+.ruff_cache/
+
+# Ignoring problem inputs
+inputs/
+input/
