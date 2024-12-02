@@ -32,6 +32,12 @@ describes.
     - [unittest] is still satisfactory for my use case for running the actual code
     - And, of course, the classic make for managing the project
 
+### Day 2
+
+- The second part of this felt like one of "there has got to be a better way to do this" kind of problem
+    - However, I didn't want to start unrolling it to make it as optimal as possible.
+    - So I think settling on making it obvious and clear is a nice compromise.
+
 [uv]: https://docs.astral.sh/uv/
 
 [ruff]: https://docs.astral.sh/ruff/
