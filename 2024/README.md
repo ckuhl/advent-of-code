@@ -38,6 +38,11 @@ describes.
     - However, I didn't want to start unrolling it to make it as optimal as possible.
     - So I think settling on making it obvious and clear is a nice compromise.
 
+### Day 3
+
+- Once again, I was very tempted to write an over-engineered "instruction-parser" type system
+    - However, we have regular expressions that work just fine
+
 [uv]: https://docs.astral.sh/uv/
 
 [ruff]: https://docs.astral.sh/ruff/
