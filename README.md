@@ -31,7 +31,7 @@ My solutions for [Advent of Code] challenges, by year and language:
 | Day 15     |      |      |      |      |        | **     | **     |        |        | **     |        |
 | Day 16     |      |      |      |      |        | **     | **     |        |        |        |        |
 | Day 17     |      |      |      |      |        | **     | **     |        |        |        |        |
-| Day 18     |      |      |      |      |        | **     |        |        |        |        |        |
+| Day 18     |      |      |      |      |        | **     | *      |        |        |        |        |
 | Day 19     |      |      |      |      |        | **     |        |        |        | *      |        |
 | Day 20     |      |      |      |      |        | **     |        |        |        |        |        |
 | Day 21     |      |      |      |      |        | **     |        |        |        |        |        |
