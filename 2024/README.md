@@ -43,6 +43,13 @@ describes.
 - Once again, I was very tempted to write an over-engineered "instruction-parser" type system
     - However, we have regular expressions that work just fine
 
+### Day 4
+
+- Part two is the first one that felt a bit like "I must be missing some key insight"
+    - Then I got the key insight
+- Again, a struggle between the sides of "simplicity of code" versus "efficiency of code"
+    - I like to think that, at present, I've found something in the middle
+
 [uv]: https://docs.astral.sh/uv/
 
 [ruff]: https://docs.astral.sh/ruff/
