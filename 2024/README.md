@@ -50,6 +50,12 @@ describes.
 - Again, a struggle between the sides of "simplicity of code" versus "efficiency of code"
     - I like to think that, at present, I've found something in the middle
 
+### Day 5
+
+- I am not sure if reversing the rule was strictly necessary, but it made the rest of the puzzle easy
+    - If it was needed, I should think more on how I can work on that insight
+    - If not, uh, it was fun I guess?
+
 [uv]: https://docs.astral.sh/uv/
 
 [ruff]: https://docs.astral.sh/ruff/
