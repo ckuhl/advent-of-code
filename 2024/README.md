@@ -56,6 +56,10 @@ describes.
     - If it was needed, I should think more on how I can work on that insight
     - If not, uh, it was fun I guess?
 
+### Day 6
+
+- The first day my code is slow
+    - It solved part 1, but it was slow enough I didn't like it one bit.
 [uv]: https://docs.astral.sh/uv/
 
 [ruff]: https://docs.astral.sh/ruff/
