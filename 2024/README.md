@@ -60,6 +60,15 @@ describes.
 
 - The first day my code is slow
     - It solved part 1, but it was slow enough I didn't like it one bit.
+
+### Day 7
+
+- Approached this before solving part 2 of day six
+- As a result, totally overthought this
+- It turns out a naive fork at each step is totally valid:
+    - Solving both parts takes about 1.2s.
+    - Not, like, super performant, but not agonizingly slow.
+
 [uv]: https://docs.astral.sh/uv/
 
 [ruff]: https://docs.astral.sh/ruff/
